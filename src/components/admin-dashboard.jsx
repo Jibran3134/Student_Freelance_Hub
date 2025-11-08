@@ -225,12 +225,6 @@ export default function AdminDashboard() {
             >
               Manage Posts
             </button>
-            <button
-              style={{ ...styles.tab, ...(activeTab === "reports" ? styles.tabActive : {}) }}
-              onClick={() => setActiveTab("reports")}
-            >
-              Reports
-            </button>
           </div>
 
           {/* Users Tab */}
@@ -326,44 +320,6 @@ export default function AdminDashboard() {
                 </tbody>
               </table>
               {/* API INTEGRATION: Replace mock data with real API call to fetch posts */}
-            </div>
-          )}
-
-          {/* Reports Tab */}
-          {activeTab === "reports" && (
-            <div style={styles.card}>
-              <h2 style={{ marginBottom: "1.5rem", fontSize: "1.25rem", fontWeight: 700, color: "#F9FAFB" }}>
-                Reports & Analytics
-              </h2>
-              <div style={styles.statsGrid}>
-                <div style={styles.statCard}>
-                  <div style={styles.statValue}>{reports.totalUsers}</div>
-                  <div style={styles.statLabel}>Total Users</div>
-                </div>
-                <div style={styles.statCard}>
-                  <div style={styles.statValue}>{reports.activeUsers}</div>
-                  <div style={styles.statLabel}>Active Users</div>
-                </div>
-                <div style={styles.statCard}>
-                  <div style={styles.statValue}>{reports.totalPosts}</div>
-                  <div style={styles.statLabel}>Total Posts</div>
-                </div>
-                <div style={styles.statCard}>
-                  <div style={styles.statValue}>{reports.activePosts}</div>
-                  <div style={styles.statLabel}>Active Posts</div>
-                </div>
-                <div style={styles.statCard}>
-                  <div style={styles.statValue}>{reports.newUsersThisMonth}</div>
-                  <div style={styles.statLabel}>New Users (This Month)</div>
-                </div>
-                <div style={styles.statCard}>
-                  <div style={styles.statValue}>
-                    {Math.round((reports.activeUsers / reports.totalUsers) * 100)}%
-                  </div>
-                  <div style={styles.statLabel}>User Activity Rate</div>
-                </div>
-              </div>
-              {/* API INTEGRATION: Replace mock data with real API call to fetch reports/analytics */}
             </div>
           )}
         </div>
