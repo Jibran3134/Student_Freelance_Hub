@@ -341,10 +341,10 @@ export default function LandingPage() {
       </div>
 
       {/* HERO */}
-      <div style={styles.container}>
+    <div style={styles.container}>
         
         <div style={styles.contentWrapper}>
-          <h1 style={styles.title}>{title}</h1>
+      <h1 style={styles.title}>{title}</h1>
           <p style={styles.subtitle}>Find real clients, ship real work, build a portfolio that wins.</p>
           <div style={styles.buttonRow}>
             <button
@@ -383,21 +383,21 @@ export default function LandingPage() {
         <p style={styles.subline}>What peers are building and where you can stand out</p>
         <div className="cardsGrid3" style={{...styles.cardsGrid}}>
           <article style={styles.card} onMouseEnter={(e)=>{e.currentTarget.style.transform = styles.cardHover.transform; e.currentTarget.style.boxShadow = styles.cardHover.boxShadow;}} onMouseLeave={(e)=>{e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = styles.card.boxShadow;}}>
-            <img style={styles.cardImage} alt="Featured projects" src="https://images.unsplash.com/photo-1526378722484-bd91ca387e72?q=80&w=1400&auto=format&fit=crop" />
+            <img style={styles.cardImage} alt="Featured projects" src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3" />
             <div style={styles.cardBody}>
               <div style={styles.cardTitle}>Featured projects</div>
               <div style={styles.cardText}>Hand-picked builds from students shipping production-ready work.</div>
             </div>
           </article>
           <article style={styles.card} onMouseEnter={(e)=>{e.currentTarget.style.transform = styles.cardHover.transform; e.currentTarget.style.boxShadow = styles.cardHover.boxShadow;}} onMouseLeave={(e)=>{e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = styles.card.boxShadow;}}>
-            <img style={styles.cardImage} alt="Top rated students" src="https://images.unsplash.com/photo-1556157382-97eda2d62296?q=80&w=1400&auto=format&fit=crop" />
+            <img style={styles.cardImage} alt="Top rated students" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3" />
             <div style={styles.cardBody}>
               <div style={styles.cardTitle}>Top rated students</div>
               <div style={styles.cardText}>Rising talent consistently earning great feedback from clients.</div>
             </div>
           </article>
           <article style={styles.card} onMouseEnter={(e)=>{e.currentTarget.style.transform = styles.cardHover.transform; e.currentTarget.style.boxShadow = styles.cardHover.boxShadow;}} onMouseLeave={(e)=>{e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = styles.card.boxShadow;}}>
-            <img style={styles.cardImage} alt="Testimonials" src="https://images.unsplash.com/photo-1526948128573-703ee1aeb6fa?q=80&w=1400&auto=format&fit=crop" />
+            <img style={styles.cardImage} alt="Testimonials" src="https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3" />
             <div style={styles.cardBody}>
               <div style={styles.cardTitle}>Testimonials</div>
               <div style={styles.cardText}>Hear from teams that hired students for real-world projects.</div>
@@ -412,21 +412,21 @@ export default function LandingPage() {
         <p style={styles.subline}>Real Student win</p>
         <div className="cardsGrid3" style={{...styles.cardsGrid}}>
           <article style={styles.card} onMouseEnter={(e)=>{e.currentTarget.style.transform = styles.cardHover.transform; e.currentTarget.style.boxShadow = styles.cardHover.boxShadow;}} onMouseLeave={(e)=>{e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = styles.card.boxShadow;}}>
-            <img style={styles.cardImage} alt="Testimonial 1" src="https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?q=80&w=1400&auto=format&fit=crop" />
+            <img style={styles.cardImage} alt="Testimonial 1" src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3" />
             <div style={styles.cardBody}>
               <div style={styles.cardTitle}>“Landed my first paid client.”</div>
               <div style={styles.cardText}>“Shipped an MVP in two weeks and got a long-term contract.”</div>
             </div>
           </article>
           <article style={styles.card} onMouseEnter={(e)=>{e.currentTarget.style.transform = styles.cardHover.transform; e.currentTarget.style.boxShadow = styles.cardHover.boxShadow;}} onMouseLeave={(e)=>{e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = styles.card.boxShadow;}}>
-            <img style={styles.cardImage} alt="Testimonial 2" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1400&auto=format&fit=crop" />
+            <img style={styles.cardImage} alt="Testimonial 2" src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3" />
             <div style={styles.cardBody}>
               <div style={styles.cardTitle}>“Portfolio made the difference.”</div>
               <div style={styles.cardText}>“The work I did here directly led to three interviews.”</div>
             </div>
           </article>
           <article style={styles.card} onMouseEnter={(e)=>{e.currentTarget.style.transform = styles.cardHover.transform; e.currentTarget.style.boxShadow = styles.cardHover.boxShadow;}} onMouseLeave={(e)=>{e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = styles.card.boxShadow;}}>
-            <img style={styles.cardImage} alt="Testimonial 3" src="https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=1400&auto=format&fit=crop" />
+            <img style={styles.cardImage} alt="Testimonial 3" src="https://images.unsplash.com/photo-1557683311-eac922347aa1?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3" />
             <div style={styles.cardBody}>
               <div style={styles.cardTitle}>“Built confidence with real users.”</div>
               <div style={styles.cardText}>“Nothing beats the feedback loop from actual clients.”</div>
@@ -446,7 +446,7 @@ export default function LandingPage() {
             <a href="#" style={{color: "#9CA3AF", textDecoration: "none"}}>Policy</a>
           </nav>
           <div style={{color: "#6B7280", fontSize: "0.9rem"}}>© {new Date().getFullYear()} All rights reserved.</div>
-        </div>
+    </div>
       </footer>
     </>
   );

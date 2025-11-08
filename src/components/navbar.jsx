@@ -50,7 +50,7 @@ export default function Navbar() {
   return (
     <nav style={styles.navbar}>
       <div style={styles.navInner}>
-        <a href="#/home" style={styles.brand}>
+        <a href="#/" style={styles.brand}>
           <img src={logo} alt="Student Freelance Hub logo" style={styles.logo} />
           Student Freelance Hub
         </a>

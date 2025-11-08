@@ -8,8 +8,9 @@ import PostPage from "./components/post-page";
 import ContactPage from "./components/contact-page";
 import Login from "./components/login";
 import Register from "./components/register";
+import AdminDashboard from "./components/admin-dashboard";
 
-function App() {
+ function App() {
   const [route, setRoute] = useState(window.location.hash || "#/");
 
   useEffect(() => {
@@ -36,6 +37,8 @@ function App() {
         return <Login />;
       case "#/register":
         return <Register />;
+      case "#/manage":
+        return <AdminDashboard />;
       case "#/":
       default:
         return <LandingPage />;
