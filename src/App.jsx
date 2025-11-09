@@ -12,6 +12,8 @@ import Login from "./components/login";
 import Register from "./components/register";
 import AdminDashboard from "./components/admin-dashboard";
 import BrowsePage from "./components/browse-page";
+import UpdateProfile from "./components/update-profile";
+import UploadPortfolio from "./components/upload-portfolio";
 
  function App() {
   const [route, setRoute] = useState(window.location.hash || "#/");
@@ -32,6 +34,10 @@ import BrowsePage from "./components/browse-page";
         return <ProfilePage />;
       case "#/users":
         return <UsersPage />;
+        case "#/update-profile":
+        return <UpdateProfile />;
+      case "#/upload-portfolio":
+        return <UploadPortfolio />;
       case "#/post":
         return <PostPage />;
       case "#/post-service":
