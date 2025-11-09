@@ -2,6 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import AverageRating from "./AverageRating";
+import StudentReviews from "./StudentReviews";
+import PaymentsTable from "./PaymentsTable";
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
@@ -264,6 +267,11 @@ export default function ProfilePage() {
           />
           <h1 style={styles.name}>{profileData.name}</h1>
           <p style={styles.email}>{profileData.email}</p>
+          {user && (
+            <div style={{ marginBottom: "1.5rem" }}>
+              <AverageRating studentId={user.uid} size="large" />
+            </div>
+          )}
           <div style={styles.actionButtons}>
             <button
               style={{ ...styles.button, ...styles.primaryButton }}
@@ -376,6 +384,20 @@ export default function ProfilePage() {
             </div>
           )}
         </div>
+
+        {/* Reviews Section */}
+        {user && (
+          <div style={{ marginTop: "2rem" }}>
+            <StudentReviews studentId={user.uid} />
+          </div>
+        )}
+
+        {/* Payments Table Section */}
+        {user && (
+          <div style={{ marginTop: "2rem" }}>
+            <PaymentsTable studentId={user.uid} />
+          </div>
+        )}
       </div>
     </div>
   );
