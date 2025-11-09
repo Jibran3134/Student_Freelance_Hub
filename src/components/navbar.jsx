@@ -56,6 +56,7 @@ export default function Navbar() {
         </a>
         <div style={styles.links}>
           <a href="#/home" style={styles.link}>Home</a>
+          <a href="#/browse" style={styles.link}>Browse</a>
           <a href="#/profile" style={styles.link}>Profile</a>
           <a href="#/users" style={styles.link}>Users</a>
           <a href="#/post" style={styles.link}>Post</a>
