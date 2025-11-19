@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
+import styles from "./styles/average-rating.module.css";
 
 /**
  * AverageRating Component
@@ -61,76 +62,40 @@ export default function AverageRating({
     return () => unsubscribe();
   }, [studentId]);
 
-  const sizeStyles = {
-    small: {
-      fontSize: "1.2rem",
-      starSize: "1rem",
-      textSize: "0.85rem",
-    },
-    medium: {
-      fontSize: "1.8rem",
-      starSize: "1.3rem",
-      textSize: "1rem",
-    },
-    large: {
-      fontSize: "2.5rem",
-      starSize: "1.8rem",
-      textSize: "1.2rem",
-    },
+  const getSizeClass = (sizeType) => {
+    const sizeMap = {
+      small: "Small",
+      medium: "Medium",
+      large: "Large",
+    };
+    return sizeMap[size] || sizeMap.medium;
   };
 
-  const currentSize = sizeStyles[size] || sizeStyles.medium;
-
-  const styles = {
-    container: {
-      display: "inline-flex",
-      alignItems: "center",
-      gap: "0.75rem",
-      flexWrap: "wrap",
-    },
-    rating: {
-      fontSize: currentSize.fontSize,
-      fontWeight: 700,
-      color: "#FFD700",
-      display: "flex",
-      alignItems: "center",
-      gap: "0.5rem",
-    },
-    star: {
-      fontSize: currentSize.starSize,
-      color: "#FFD700",
-    },
-    text: {
-      fontSize: currentSize.textSize,
-      color: "#9CA3AF",
-    },
-    loading: {
-      fontSize: currentSize.textSize,
-      color: "#6B7280",
-    },
-  };
+  const ratingSizeClass = `rating${getSizeClass(size)}`;
+  const starSizeClass = `star${getSizeClass(size)}`;
+  const textSizeClass = `text${getSizeClass(size)}`;
 
   if (loading) {
-    return <span style={styles.loading}>Loading rating...</span>;
+    return <span className={`${styles.loading} ${styles[textSizeClass]}`}>Loading rating...</span>;
   }
 
   if (totalRatings === 0) {
     return (
-      <div style={styles.container}>
-        <span style={styles.text}>No ratings yet</span>
+      <div className={styles.container}>
+        <span className={`${styles.text} ${styles[textSizeClass]}`}>No ratings yet</span>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.rating}>
-        <span style={styles.star}>★</span>
+    <div className={styles.container}>
+      <div className={`${styles.rating} ${styles[ratingSizeClass]}`}>
+        <span className={`${styles.star} ${styles[starSizeClass]}`}>★</span>
         <span>{averageRating.toFixed(1)}</span>
-        <span style={{ color: "#6B7280", fontSize: "0.7em" }}>/ 5</span>
+        <span className={styles.ratingFraction}>/ 5</span>
       </div>
       {showTotalCount && (
-        <span style={styles.text}>
+        <span className={`${styles.text} ${styles[textSizeClass]}`}>
           ({totalRatings} review{totalRatings !== 1 ? "s" : ""})
         </span>
       )}

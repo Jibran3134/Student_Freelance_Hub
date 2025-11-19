@@ -1,0 +1,157 @@
+.container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+}
+
+.averageRatingContainer {
+  text-align: center;
+  padding: 2rem;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  margin-bottom: 2rem;
+}
+
+.averageRating {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #FFD700;
+  margin-bottom: 0.5rem;
+}
+
+.averageRatingText {
+  font-size: 1.2rem;
+  color: #9CA3AF;
+  margin-bottom: 0.5rem;
+}
+
+.totalRatings {
+  font-size: 0.9rem;
+  color: #6B7280;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #E5E7EB;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #9CA3AF;
+}
+
+.error {
+  text-align: center;
+  padding: 2rem;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.noReviews {
+  text-align: center;
+  padding: 3rem;
+  color: #9CA3AF;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.noReviewsTitle {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.noReviewsText {
+  font-size: 0.9rem;
+}
+
+.reviewCard {
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.reviewCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.reviewerInfo {
+  flex: 1;
+}
+
+.reviewerName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #E5E7EB;
+  margin-bottom: 0.25rem;
+}
+
+.reviewDate {
+  font-size: 0.85rem;
+  color: #6B7280;
+}
+
+.reviewRating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.starsContainer {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.star {
+  font-size: 1.2rem;
+}
+
+.starFilled {
+  color: #FFD700;
+}
+
+.starEmpty {
+  color: #6B7280;
+}
+
+.ratingValue {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #FFD700;
+}
+
+.reviewComment {
+  color: #D1D5DB;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sectionMargin {
+  margin-top: 2rem;
+}
+

@@ -9,6 +9,7 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
+import styles from "./styles/student-reviews.module.css";
 
 /**
  * StudentReviews Component
@@ -176,14 +177,11 @@ export default function StudentReviews({
 
   const renderStars = (rating) => {
     return (
-      <div style={{ display: "flex", gap: "0.25rem" }}>
+      <div className={styles.starsContainer}>
         {[1, 2, 3, 4, 5].map((star) => (
           <span
             key={star}
-            style={{
-              color: star <= rating ? "#FFD700" : "#6B7280",
-              fontSize: "1.2rem",
-            }}
+            className={`${styles.star} ${star <= rating ? styles.starFilled : styles.starEmpty}`}
           >
             ★
           </span>
@@ -192,175 +190,67 @@ export default function StudentReviews({
     );
   };
 
-  const styles = {
-    container: {
-      maxWidth: "800px",
-      margin: "2rem auto",
-      padding: "2rem",
-    },
-    averageRatingContainer: {
-      textAlign: "center",
-      padding: "2rem",
-      background: "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
-      border: "1px solid rgba(255,255,255,0.06)",
-      borderRadius: "20px",
-      boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)",
-      marginBottom: "2rem",
-    },
-    averageRating: {
-      fontSize: "3rem",
-      fontWeight: 700,
-      color: "#FFD700",
-      marginBottom: "0.5rem",
-    },
-    averageRatingText: {
-      fontSize: "1.2rem",
-      color: "#9CA3AF",
-      marginBottom: "0.5rem",
-    },
-    totalRatings: {
-      fontSize: "0.9rem",
-      color: "#6B7280",
-    },
-    title: {
-      fontSize: "1.8rem",
-      fontWeight: 700,
-      marginBottom: "1.5rem",
-      color: "#E5E7EB",
-    },
-    loading: {
-      textAlign: "center",
-      padding: "2rem",
-      color: "#9CA3AF",
-    },
-    error: {
-      textAlign: "center",
-      padding: "2rem",
-      color: "#fca5a5",
-      background: "rgba(239, 68, 68, 0.1)",
-      borderRadius: "12px",
-      border: "1px solid rgba(239, 68, 68, 0.3)",
-    },
-    noReviews: {
-      textAlign: "center",
-      padding: "3rem",
-      color: "#9CA3AF",
-      background: "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
-      border: "1px solid rgba(255,255,255,0.06)",
-      borderRadius: "20px",
-      boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)",
-    },
-    reviewCard: {
-      padding: "1.5rem",
-      marginBottom: "1rem",
-      background: "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
-      border: "1px solid rgba(255,255,255,0.06)",
-      borderRadius: "20px",
-      boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)",
-      transition: "transform 0.2s, box-shadow 0.2s",
-    },
-    reviewHeader: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "flex-start",
-      marginBottom: "1rem",
-      flexWrap: "wrap",
-      gap: "1rem",
-    },
-    reviewerInfo: {
-      flex: 1,
-    },
-    reviewerName: {
-      fontSize: "1.1rem",
-      fontWeight: 600,
-      color: "#E5E7EB",
-      marginBottom: "0.25rem",
-    },
-    reviewDate: {
-      fontSize: "0.85rem",
-      color: "#6B7280",
-    },
-    reviewRating: {
-      display: "flex",
-      alignItems: "center",
-      gap: "0.5rem",
-    },
-    ratingValue: {
-      fontSize: "1.1rem",
-      fontWeight: 600,
-      color: "#FFD700",
-    },
-    reviewComment: {
-      color: "#D1D5DB",
-      lineHeight: "1.6",
-      fontSize: "0.95rem",
-      marginTop: "1rem",
-      paddingTop: "1rem",
-      borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-    },
-  };
-
   if (loading) {
     return (
-      <div style={styles.container}>
-        <div style={styles.loading}>Loading reviews...</div>
+      <div className={styles.container}>
+        <div className={styles.loading}>Loading reviews...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={styles.container}>
-        <div style={styles.error}>{error}</div>
+      <div className={styles.container}>
+        <div className={styles.error}>{error}</div>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
+    <div className={styles.container}>
       {showAverageRating && totalRatings > 0 && (
-        <div style={styles.averageRatingContainer}>
-          <div style={styles.averageRating}>
+        <div className={styles.averageRatingContainer}>
+          <div className={styles.averageRating}>
             ★ {averageRating.toFixed(1)} / 5
           </div>
-          <div style={styles.averageRatingText}>Average Rating</div>
-          <div style={styles.totalRatings}>
+          <div className={styles.averageRatingText}>Average Rating</div>
+          <div className={styles.totalRatings}>
             Based on {totalRatings} review{totalRatings !== 1 ? "s" : ""}
           </div>
         </div>
       )}
 
-      <h3 style={styles.title}>
+      <h3 className={styles.title}>
         Reviews {totalRatings > 0 && `(${totalRatings})`}
       </h3>
 
       {reviews.length === 0 ? (
-        <div style={styles.noReviews}>
-          <p style={{ fontSize: "1.1rem", marginBottom: "0.5rem" }}>
+        <div className={styles.noReviews}>
+          <p className={styles.noReviewsTitle}>
             No reviews yet
           </p>
-          <p style={{ fontSize: "0.9rem" }}>
+          <p className={styles.noReviewsText}>
             This student hasn't received any ratings yet.
           </p>
         </div>
       ) : (
         <div>
           {reviews.map((review) => (
-            <div key={review.id} style={styles.reviewCard}>
-              <div style={styles.reviewHeader}>
-                <div style={styles.reviewerInfo}>
-                  <div style={styles.reviewerName}>{review.reviewerName}</div>
-                  <div style={styles.reviewDate}>
+            <div key={review.id} className={styles.reviewCard}>
+              <div className={styles.reviewHeader}>
+                <div className={styles.reviewerInfo}>
+                  <div className={styles.reviewerName}>{review.reviewerName}</div>
+                  <div className={styles.reviewDate}>
                     {formatDate(review.date)}
                   </div>
                 </div>
-                <div style={styles.reviewRating}>
+                <div className={styles.reviewRating}>
                   {renderStars(review.rating)}
-                  <span style={styles.ratingValue}>{review.rating}/5</span>
+                  <span className={styles.ratingValue}>{review.rating}/5</span>
                 </div>
               </div>
               {review.comment && (
-                <div style={styles.reviewComment}>{review.comment}</div>
+                <div className={styles.reviewComment}>{review.comment}</div>
               )}
             </div>
           ))}

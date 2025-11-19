@@ -8,6 +8,7 @@ import {
   orderBy,
   onSnapshot,
 } from "firebase/firestore";
+import styles from "./styles/payments-table.module.css";
 
 /**
  * PaymentsTable Component
@@ -141,163 +142,81 @@ export default function PaymentsTable({ studentId }) {
     return amount || "N/A";
   };
 
-  const getStatusColor = (status) => {
+  const getStatusClass = (status) => {
     switch (status?.toLowerCase()) {
       case "paid":
-        return "#10b981"; // green
+        return styles.statusPaid;
       case "pending":
-        return "#f59e0b"; // yellow/amber
+        return styles.statusPending;
       case "failed":
-        return "#ef4444"; // red
+        return styles.statusFailed;
       default:
-        return "#6b7280"; // gray
+        return styles.statusUnknown;
     }
-  };
-
-  const styles = {
-    container: {
-      maxWidth: "1000px",
-      margin: "2rem auto",
-      padding: "2rem",
-    },
-    title: {
-      fontSize: "1.8rem",
-      fontWeight: 700,
-      marginBottom: "1.5rem",
-      color: "#E5E7EB",
-    },
-    loading: {
-      textAlign: "center",
-      padding: "2rem",
-      color: "#9CA3AF",
-    },
-    error: {
-      textAlign: "center",
-      padding: "2rem",
-      color: "#fca5a5",
-      background: "rgba(239, 68, 68, 0.1)",
-      borderRadius: "12px",
-      border: "1px solid rgba(239, 68, 68, 0.3)",
-    },
-    tableContainer: {
-      overflowX: "auto",
-      background: "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
-      border: "1px solid rgba(255,255,255,0.06)",
-      borderRadius: "20px",
-      boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)",
-    },
-    table: {
-      width: "100%",
-      borderCollapse: "collapse",
-      minWidth: "600px",
-    },
-    thead: {
-      background: "rgba(255, 255, 255, 0.05)",
-    },
-    th: {
-      padding: "1rem",
-      textAlign: "left",
-      fontSize: "0.875rem",
-      fontWeight: 600,
-      color: "#9CA3AF",
-      textTransform: "uppercase",
-      letterSpacing: "0.05em",
-      borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
-    },
-    td: {
-      padding: "1rem",
-      borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
-      color: "#D1D5DB",
-      fontSize: "0.95rem",
-    },
-    statusBadge: {
-      display: "inline-block",
-      padding: "0.25rem 0.75rem",
-      borderRadius: "12px",
-      fontSize: "0.875rem",
-      fontWeight: 600,
-      textTransform: "capitalize",
-    },
-    noPayments: {
-      textAlign: "center",
-      padding: "3rem",
-      color: "#9CA3AF",
-    },
-    paymentId: {
-      fontFamily: "monospace",
-      fontSize: "0.85rem",
-      color: "#8B5CF6",
-    },
   };
 
   if (loading) {
     return (
-      <div style={styles.container}>
-        <h3 style={styles.title}>Payments</h3>
-        <div style={styles.loading}>Loading payments...</div>
+      <div className={styles.container}>
+        <h3 className={styles.title}>Payments</h3>
+        <div className={styles.loading}>Loading payments...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={styles.container}>
-        <h3 style={styles.title}>Payments</h3>
-        <div style={styles.error}>{error}</div>
+      <div className={styles.container}>
+        <h3 className={styles.title}>Payments</h3>
+        <div className={styles.error}>{error}</div>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
-      <h3 style={styles.title}>Payments</h3>
+    <div className={styles.container}>
+      <h3 className={styles.title}>Payments</h3>
       {payments.length === 0 ? (
-        <div style={styles.noPayments}>
-          <p style={{ fontSize: "1.1rem", marginBottom: "0.5rem" }}>
+        <div className={styles.noPayments}>
+          <p className={styles.noPaymentsTitle}>
             No payments found
           </p>
-          <p style={{ fontSize: "0.9rem" }}>
+          <p className={styles.noPaymentsText}>
             Payment history will appear here once transactions are recorded.
           </p>
         </div>
       ) : (
-        <div style={styles.tableContainer}>
-          <table style={styles.table}>
-            <thead style={styles.thead}>
+        <div className={styles.tableContainer}>
+          <table className={styles.table}>
+            <thead className={styles.thead}>
               <tr>
-                <th style={styles.th}>Payment ID</th>
-                <th style={styles.th}>Job ID</th>
-                <th style={styles.th}>Amount</th>
-                <th style={styles.th}>Status</th>
-                <th style={styles.th}>Date</th>
+                <th className={styles.th}>Payment ID</th>
+                <th className={styles.th}>Job ID</th>
+                <th className={styles.th}>Amount</th>
+                <th className={styles.th}>Status</th>
+                <th className={styles.th}>Date</th>
               </tr>
             </thead>
             <tbody>
               {payments.map((payment) => (
                 <tr key={payment.id}>
-                  <td style={styles.td}>
-                    <span style={styles.paymentId}>
+                  <td className={styles.td}>
+                    <span className={styles.paymentId}>
                       {payment.paymentId || payment.id}
                     </span>
                   </td>
-                  <td style={styles.td}>
-                    <span style={styles.paymentId}>
+                  <td className={styles.td}>
+                    <span className={styles.paymentId}>
                       {payment.jobId || "N/A"}
                     </span>
                   </td>
-                  <td style={styles.td}>{formatAmount(payment.amount)}</td>
-                  <td style={styles.td}>
-                    <span
-                      style={{
-                        ...styles.statusBadge,
-                        background: `${getStatusColor(payment.status)}20`,
-                        color: getStatusColor(payment.status),
-                      }}
-                    >
+                  <td className={styles.td}>{formatAmount(payment.amount)}</td>
+                  <td className={styles.td}>
+                    <span className={`${styles.statusBadge} ${getStatusClass(payment.status)}`}>
                       {payment.status || "Unknown"}
                     </span>
                   </td>
-                  <td style={styles.td}>{formatDate(payment.date)}</td>
+                  <td className={styles.td}>{formatDate(payment.date)}</td>
                 </tr>
               ))}
             </tbody>
