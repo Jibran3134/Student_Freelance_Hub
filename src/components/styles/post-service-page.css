@@ -1,0 +1,234 @@
+.post-service-page {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(180deg, #0e0a17 0%, #171228 60%, #130f20 100%);
+  font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #e5e7eb;
+}
+
+.post-service-wrapper {
+  position: relative;
+  z-index: 2;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+}
+
+.post-service-heading {
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  background: linear-gradient(90deg, #f9fafb 0%, #d1d5db 20%, #8b5cf6 50%, #d1d5db 80%, #f9fafb 100%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: textShimmer 10s ease-in-out infinite;
+}
+
+.post-service-subline {
+  color: #9ca3af;
+  margin-bottom: 2.5rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.post-service-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  padding: 2rem;
+}
+
+.post-service-label {
+  display: block;
+  color: #d1d5db;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.35rem;
+  margin-top: 1rem;
+}
+
+.post-service-label:first-of-type {
+  margin-top: 0;
+}
+
+.post-service-input,
+.post-service-select,
+.post-service-textarea {
+  width: 100%;
+  background: #0f0d19;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e5e7eb;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 1.25rem;
+  font-size: 1rem;
+}
+
+.post-service-select {
+  cursor: pointer;
+}
+
+.post-service-textarea {
+  min-height: 140px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.post-service-input:focus,
+.post-service-select:focus,
+.post-service-textarea:focus,
+.post-service-tier-textarea:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+.post-service-radio-group {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.post-service-radio-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.post-service-radio-input {
+  cursor: pointer;
+}
+
+.post-service-radio-label {
+  color: #d1d5db;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.post-service-tier {
+  margin-top: 1rem;
+  padding: 1.5rem;
+  background: rgba(139, 92, 246, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 10px;
+  margin-bottom: 1.25rem;
+}
+
+.post-service-tier-title {
+  color: #d1d5db;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.post-service-tier-row {
+  margin-bottom: 1rem;
+}
+
+.post-service-tier-row:last-of-type {
+  margin-bottom: 0;
+}
+
+.post-service-tier-textarea {
+  width: 100%;
+  background: #0f0d19;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e5e7eb;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-height: 80px;
+  resize: vertical;
+  font-family: inherit;
+  margin-bottom: 1rem;
+}
+
+.post-service-tier-row:last-of-type .post-service-tier-textarea {
+  margin-bottom: 0;
+}
+
+.post-service-button-primary {
+  width: 100%;
+  padding: 0.85rem 1.35rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+}
+
+.post-service-button-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.post-service-button-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.post-service-button-secondary {
+  width: 100%;
+  padding: 0.85rem 1.35rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 0.5rem;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+}
+
+.post-service-button-secondary:hover {
+  border-color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.post-service-status {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.post-service-status.success {
+  background: rgba(196, 241, 196, 0.15);
+  color: #c4f1c4;
+  border: 1px solid rgba(196, 241, 196, 0.3);
+}
+
+.post-service-status.error {
+  background: rgba(252, 165, 165, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(252, 165, 165, 0.3);
+}
+
+@keyframes textShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+

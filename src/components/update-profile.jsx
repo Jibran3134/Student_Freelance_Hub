@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { auth, db, storage } from "../firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import styles from "./styles/update-profile.module.css";
 
 export default function UpdateProfile() {
   const [formData, setFormData] = useState({
@@ -245,201 +246,30 @@ export default function UpdateProfile() {
     window.location.hash = "#/profile";
   };
 
-  const styles = {
-    container: {
-      minHeight: "100vh",
-      background: "linear-gradient(180deg, #0e0a17 0%, #171228 60%, #130f20 100%)",
-      padding: "2rem 1rem",
-      color: "#E5E7EB",
-      fontFamily: "'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
-    },
-    content: {
-      maxWidth: "800px",
-      margin: "0 auto",
-    },
-    card: {
-      background: "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
-      border: "1px solid rgba(255,255,255,0.06)",
-      borderRadius: "20px",
-      boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)",
-      padding: "3rem",
-    },
-    title: {
-      fontSize: "2rem",
-      fontWeight: 700,
-      color: "#F9FAFB",
-      marginBottom: "2rem",
-      textAlign: "center",
-    },
-    form: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "1.5rem",
-    },
-    inputGroup: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "0.5rem",
-    },
-    label: {
-      fontSize: "0.875rem",
-      fontWeight: 600,
-      color: "#D1D5DB",
-    },
-    input: {
-      padding: "0.875rem 1rem",
-      border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: "12px",
-      fontSize: "1rem",
-      transition: "all 0.3s ease",
-      outline: "none",
-      fontFamily: "inherit",
-      background: "rgba(255,255,255,0.03)",
-      color: "#E5E7EB",
-    },
-    textarea: {
-      padding: "0.875rem 1rem",
-      border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: "12px",
-      fontSize: "1rem",
-      transition: "all 0.3s ease",
-      outline: "none",
-      fontFamily: "inherit",
-      resize: "vertical",
-      minHeight: "100px",
-      background: "rgba(255,255,255,0.03)",
-      color: "#E5E7EB",
-    },
-    error: {
-      color: "#e53e3e",
-      fontSize: "0.875rem",
-      marginTop: "0.25rem",
-    },
-    imageUpload: {
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: "1rem",
-    },
-    imagePreview: {
-      width: "150px",
-      height: "150px",
-      borderRadius: "50%",
-      objectFit: "cover",
-      border: "5px solid #8B5CF6",
-      boxShadow: "0 8px 20px rgba(139, 92, 246, 0.3)",
-    },
-    fileInput: {
-      display: "none",
-    },
-    fileInputLabel: {
-      padding: "0.75rem 1.5rem",
-      borderRadius: "12px",
-      fontSize: "0.95rem",
-      fontWeight: 600,
-      border: "1px solid #8B5CF6",
-      background: "rgba(255,255,255,0.03)",
-      color: "#8B5CF6",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-      display: "inline-block",
-    },
-    skillsContainer: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "0.75rem",
-    },
-    skillsList: {
-      display: "flex",
-      flexWrap: "wrap",
-      gap: "0.75rem",
-    },
-    skillTag: {
-      background: "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)",
-      color: "#ffffff",
-      padding: "0.5rem 1rem",
-      borderRadius: "20px",
-      fontSize: "0.875rem",
-      fontWeight: 600,
-      display: "flex",
-      alignItems: "center",
-      gap: "0.5rem",
-    },
-    removeButton: {
-      background: "rgba(255, 255, 255, 0.3)",
-      border: "none",
-      borderRadius: "50%",
-      width: "20px",
-      height: "20px",
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      color: "#ffffff",
-      fontSize: "0.75rem",
-      fontWeight: 700,
-    },
-    buttons: {
-      display: "flex",
-      gap: "1rem",
-      marginTop: "1rem",
-    },
-    button: {
-      flex: 1,
-      padding: "0.875rem 1.5rem",
-      borderRadius: "12px",
-      fontSize: "1rem",
-      fontWeight: 600,
-      border: "none",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-    },
-    primaryButton: {
-      background: "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)",
-      color: "#ffffff",
-      boxShadow: "0 4px 15px rgba(139, 92, 246, 0.4)",
-    },
-    secondaryButton: {
-      background: "rgba(255,255,255,0.03)",
-      color: "#8B5CF6",
-      border: "1px solid #8B5CF6",
-    },
-    buttonDisabled: {
-      opacity: 0.6,
-      cursor: "not-allowed",
-    },
-    submitError: {
-      color: "#e53e3e",
-      fontSize: "0.875rem",
-      textAlign: "center",
-      marginTop: "0.5rem",
-    },
-  };
-
   return (
-    <div style={styles.container}>
-      <div style={styles.content}>
-        <div style={styles.card}>
-          <h1 style={styles.title}>Update Profile</h1>
+    <div className={styles.container}>
+      <div className={styles.content}>
+        <div className={styles.card}>
+          <h1 className={styles.title}>Update Profile</h1>
 
-          <form onSubmit={handleSave} style={styles.form}>
+          <form onSubmit={handleSave} className={styles.form}>
             {/* Profile Picture Upload */}
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Profile Picture</label>
-              <div style={styles.imageUpload}>
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>Profile Picture</label>
+              <div className={styles.imageUpload}>
                 <img
                   src={formData.profilePicturePreview}
                   alt="Profile Preview"
-                  style={styles.imagePreview}
+                  className={styles.imagePreview}
                 />
-                <label htmlFor="profilePicture" style={styles.fileInputLabel}>
+                <label htmlFor="profilePicture" className={styles.fileInputLabel}>
                   <svg
                     width="20"
                     height="20"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
-                    style={{ display: "inline-block", marginRight: "0.5rem", verticalAlign: "middle" }}
+                    className={styles.icon}
                   >
                     <path
                       strokeLinecap="round"
@@ -455,22 +285,22 @@ export default function UpdateProfile() {
                   id="profilePicture"
                   accept="image/*"
                   onChange={handleImageChange}
-                  style={styles.fileInput}
+                  className={styles.fileInput}
                 />
                 {formData.profilePicture && (
-                  <p style={{ fontSize: "0.875rem", color: "#10B981", marginTop: "0.5rem" }}>
+                  <p className={styles.fileSelected}>
                     ✓ File selected: {formData.profilePicture.name} ({(formData.profilePicture.size / 1024).toFixed(2)} KB)
                   </p>
                 )}
                 {errors.profilePicture && (
-                  <span style={styles.error}>{errors.profilePicture}</span>
+                  <span className={styles.error}>{errors.profilePicture}</span>
                 )}
               </div>
             </div>
 
             {/* Name Field */}
-            <div style={styles.inputGroup}>
-              <label style={styles.label} htmlFor="name">
+            <div className={styles.inputGroup}>
+              <label className={styles.label} htmlFor="name">
                 Full Name
               </label>
               <input
@@ -480,22 +310,17 @@ export default function UpdateProfile() {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Enter your full name"
-                style={{
-                  ...styles.input,
-                  ...(errors.name ? { borderColor: "#e53e3e" } : {}),
-                }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "#8B5CF6")}
-              onBlur={(e) => (e.currentTarget.style.borderColor = errors.name ? "#e53e3e" : "rgba(255,255,255,0.1)")}
+                className={`${styles.input} ${errors.name ? styles.inputError : ""}`}
               />
-              {errors.name && <span style={styles.error}>{errors.name}</span>}
+              {errors.name && <span className={styles.error}>{errors.name}</span>}
             </div>
 
             {/* Skills Field */}
-            <div style={styles.inputGroup}>
-              <label style={styles.label} htmlFor="skills">
+            <div className={styles.inputGroup}>
+              <label className={styles.label} htmlFor="skills">
                 Skills
               </label>
-              <div style={styles.skillsContainer}>
+              <div className={styles.skillsContainer}>
                 <input
                   type="text"
                   id="skills"
@@ -503,21 +328,16 @@ export default function UpdateProfile() {
                   onChange={(e) => setSkillInput(e.target.value)}
                   onKeyPress={handleSkillAdd}
                   placeholder="Type a skill and press Enter"
-                  style={{
-                    ...styles.input,
-                    ...(errors.skills ? { borderColor: "#e53e3e" } : {}),
-                  }}
-                  onFocus={(e) => (e.currentTarget.style.borderColor = "#8B5CF6")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = errors.skills ? "#e53e3e" : "rgba(255,255,255,0.1)")}
+                  className={`${styles.input} ${errors.skills ? styles.inputError : ""}`}
                 />
                 {formData.skills.length > 0 && (
-                  <div style={styles.skillsList}>
+                  <div className={styles.skillsList}>
                     {formData.skills.map((skill, index) => (
-                      <span key={index} style={styles.skillTag}>
+                      <span key={index} className={styles.skillTag}>
                         {skill}
                         <button
                           type="button"
-                          style={styles.removeButton}
+                          className={styles.removeButton}
                           onClick={() => handleSkillRemove(skill)}
                         >
                           ×
@@ -526,13 +346,13 @@ export default function UpdateProfile() {
                     ))}
                   </div>
                 )}
-                {errors.skills && <span style={styles.error}>{errors.skills}</span>}
+                {errors.skills && <span className={styles.error}>{errors.skills}</span>}
               </div>
             </div>
 
             {/* Education Field */}
-            <div style={styles.inputGroup}>
-              <label style={styles.label} htmlFor="education">
+            <div className={styles.inputGroup}>
+              <label className={styles.label} htmlFor="education">
                 Education
               </label>
               <textarea
@@ -541,59 +361,30 @@ export default function UpdateProfile() {
                 value={formData.education}
                 onChange={handleChange}
                 placeholder="Enter your education details"
-                style={{
-                  ...styles.textarea,
-                  ...(errors.education ? { borderColor: "#e53e3e" } : {}),
-                }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "#8B5CF6")}
-              onBlur={(e) => (e.currentTarget.style.borderColor = errors.education ? "#e53e3e" : "rgba(255,255,255,0.1)")}
+                className={`${styles.textarea} ${errors.education ? styles.textareaError : ""}`}
               />
               {errors.education && (
-                <span style={styles.error}>{errors.education}</span>
+                <span className={styles.error}>{errors.education}</span>
               )}
             </div>
 
             {errors.submit && (
-              <div style={styles.submitError}>{errors.submit}</div>
+              <div className={styles.submitError}>{errors.submit}</div>
             )}
 
             {/* Action Buttons */}
-            <div style={styles.buttons}>
+            <div className={styles.buttons}>
               <button
                 type="button"
-                style={{ ...styles.button, ...styles.secondaryButton }}
+                className={`${styles.button} ${styles.secondaryButton}`}
                 onClick={handleCancel}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.03)";
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                style={{
-                  ...styles.button,
-                  ...styles.primaryButton,
-                  ...(loading ? styles.buttonDisabled : {}),
-                }}
+                className={`${styles.button} ${styles.primaryButton} ${loading ? styles.buttonDisabled : ""}`}
                 disabled={loading}
-                onMouseEnter={(e) => {
-                  if (!loading) {
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                    e.currentTarget.style.boxShadow = "0 6px 20px rgba(139, 92, 246, 0.5)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!loading) {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "0 4px 15px rgba(139, 92, 246, 0.4)";
-                  }
-                }}
               >
                 {loading ? "Saving..." : "Save Changes"}
               </button>

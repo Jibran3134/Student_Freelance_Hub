@@ -1,0 +1,239 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0e0a17 0%, #171228 60%, #130f20 100%);
+  padding: 2rem 1rem;
+  color: #E5E7EB;
+  font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  padding: 3rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #F9FAFB;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #D1D5DB;
+}
+
+.input {
+  padding: 0.875rem 1rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  outline: none;
+  font-family: inherit;
+  background: rgba(255,255,255,0.03);
+  color: #E5E7EB;
+}
+
+.input:focus {
+  border-color: #8B5CF6;
+}
+
+.inputError {
+  border-color: #e53e3e;
+}
+
+.textarea {
+  padding: 0.875rem 1rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  outline: none;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  background: rgba(255,255,255,0.03);
+  color: #E5E7EB;
+}
+
+.textarea:focus {
+  border-color: #8B5CF6;
+}
+
+.textareaError {
+  border-color: #e53e3e;
+}
+
+.error {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.imageUpload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.imagePreview {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 5px solid #8B5CF6;
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+}
+
+.fileInput {
+  display: none;
+}
+
+.fileInputLabel {
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 1px solid #8B5CF6;
+  background: rgba(255,255,255,0.03);
+  color: #8B5CF6;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.fileInputLabel:hover {
+  background: rgba(255,255,255,0.05);
+  transform: translateY(-2px);
+}
+
+.skillsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skillsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.skillTag {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.removeButton {
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.removeButton:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.button {
+  flex: 1;
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.primaryButton {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+}
+
+.primaryButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+}
+
+.secondaryButton {
+  background: rgba(255,255,255,0.03);
+  color: #8B5CF6;
+  border: 1px solid #8B5CF6;
+}
+
+.secondaryButton:hover {
+  background: rgba(255,255,255,0.05);
+  transform: translateY(-2px);
+}
+
+.buttonDisabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submitError {
+  color: #e53e3e;
+  font-size: 0.875rem;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.fileSelected {
+  font-size: 0.875rem;
+  color: #10B981;
+  margin-top: 0.5rem;
+}
+
+.icon {
+  display: inline-block;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+

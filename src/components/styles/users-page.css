@@ -1,0 +1,26 @@
+.users-page {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(180deg, #0e0a17 0%, #171228 60%, #130f20 100%);
+  color: #e5e7eb;
+  font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.users-main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.users-heading {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+}
+
+.users-text {
+  color: #9ca3af;
+}
+

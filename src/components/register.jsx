@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { auth, db } from "../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
+import "./styles/register.css";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -93,169 +94,16 @@ export default function Register() {
     console.log(`Social login with ${provider}`);
   };
 
-  const styles = {
-    container: {
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "linear-gradient(180deg, #0e0a17 0%, #171228 60%, #130f20 100%)",
-      padding: "2rem 1rem",
-      color: "#E5E7EB",
-      fontFamily: "'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
-    },
-    card: {
-      background: "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
-      border: "1px solid rgba(255,255,255,0.06)",
-      borderRadius: "20px",
-      boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)",
-      padding: "3rem",
-      width: "100%",
-      maxWidth: "480px",
-      animation: "fadeInUp 0.6s ease-out",
-    },
-    title: {
-      fontSize: "2rem",
-      fontWeight: 700,
-      color: "#F9FAFB",
-      marginBottom: "0.5rem",
-      textAlign: "center",
-    },
-    subtitle: {
-      fontSize: "0.95rem",
-      color: "#9CA3AF",
-      textAlign: "center",
-      marginBottom: "2rem",
-    },
-    form: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "1.25rem",
-    },
-    inputGroup: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "0.5rem",
-    },
-    label: {
-      fontSize: "0.875rem",
-      fontWeight: 600,
-      color: "#D1D5DB",
-    },
-    input: {
-      padding: "0.875rem 1rem",
-      border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: "12px",
-      fontSize: "1rem",
-      transition: "all 0.3s ease",
-      outline: "none",
-      fontFamily: "inherit",
-      background: "rgba(255,255,255,0.03)",
-      color: "#E5E7EB",
-    },
-    inputFocus: {
-      borderColor: "#8B5CF6",
-      boxShadow: "0 0 0 3px rgba(139, 92, 246, 0.1)",
-    },
-    error: {
-      color: "#e53e3e",
-      fontSize: "0.875rem",
-      marginTop: "0.25rem",
-    },
-    button: {
-      padding: "0.875rem 1.5rem",
-      borderRadius: "12px",
-      fontSize: "1rem",
-      fontWeight: 600,
-      border: "none",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-      background: "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)",
-      color: "#ffffff",
-      marginTop: "0.5rem",
-      boxShadow: "0 4px 15px rgba(139, 92, 246, 0.4)",
-    },
-    buttonHover: {
-      transform: "translateY(-2px)",
-      boxShadow: "0 6px 20px rgba(139, 92, 246, 0.5)",
-    },
-    buttonDisabled: {
-      opacity: 0.6,
-      cursor: "not-allowed",
-    },
-    divider: {
-      display: "flex",
-      alignItems: "center",
-      margin: "1.5rem 0",
-      color: "#6B7280",
-      fontSize: "0.875rem",
-    },
-    dividerLine: {
-      flex: 1,
-      height: "1px",
-      background: "rgba(255,255,255,0.1)",
-    },
-    dividerText: {
-      padding: "0 1rem",
-    },
-    socialButtons: {
-      display: "flex",
-      gap: "1rem",
-      marginBottom: "1.5rem",
-    },
-    socialButton: {
-      flex: 1,
-      padding: "0.75rem",
-      borderRadius: "12px",
-      border: "1px solid rgba(255,255,255,0.1)",
-      background: "rgba(255,255,255,0.03)",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "0.5rem",
-      fontSize: "0.875rem",
-      fontWeight: 600,
-      color: "#D1D5DB",
-    },
-    socialButtonHover: {
-      borderColor: "#8B5CF6",
-      transform: "translateY(-2px)",
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-    },
-    loginLink: {
-      textAlign: "center",
-      marginTop: "1.5rem",
-      fontSize: "0.875rem",
-      color: "#9CA3AF",
-    },
-    loginLinkText: {
-      color: "#8B5CF6",
-      fontWeight: 600,
-      textDecoration: "none",
-      cursor: "pointer",
-    },
-    submitError: {
-      color: "#e53e3e",
-      fontSize: "0.875rem",
-      textAlign: "center",
-      marginTop: "0.5rem",
-    },
-  };
-
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Create Account</h1>
-        <p style={styles.subtitle}>Join the Students Freelance Hub community</p>
+    <div className="register-page">
+      <div className="register-card">
+        <h1 className="register-title">Create Account</h1>
+        <p className="register-subtitle">Join the Students Freelance Hub community</p>
 
-        <div style={styles.socialButtons}>
+        <div className="register-social-buttons">
           <button
             type="button"
-            style={styles.socialButton}
-            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#8B5CF6")}
-            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+            className="register-social-button"
             onClick={() => handleSocialLogin("Google")}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -280,9 +128,7 @@ export default function Register() {
           </button>
           <button
             type="button"
-            style={styles.socialButton}
-            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#8B5CF6")}
-            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+            className="register-social-button"
             onClick={() => handleSocialLogin("GitHub")}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -292,15 +138,15 @@ export default function Register() {
           </button>
         </div>
 
-        <div style={styles.divider}>
-          <div style={styles.dividerLine}></div>
-          <span style={styles.dividerText}>or sign up with email</span>
-          <div style={styles.dividerLine}></div>
+        <div className="register-divider">
+          <div className="register-divider-line"></div>
+          <span className="register-divider-text">or sign up with email</span>
+          <div className="register-divider-line"></div>
         </div>
 
-        <form onSubmit={registerUser} style={styles.form}>
-          <div style={styles.inputGroup}>
-            <label style={styles.label} htmlFor="name">
+        <form onSubmit={registerUser} className="register-form">
+          <div className="register-input-group">
+            <label className="register-label" htmlFor="name">
               Full Name
             </label>
             <input
@@ -310,18 +156,13 @@ export default function Register() {
               value={formData.name}
               onChange={handleChange}
               placeholder="Enter your full name"
-              style={{
-                ...styles.input,
-                ...(errors.name ? { borderColor: "#e53e3e" } : {}),
-              }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "#8B5CF6")}
-              onBlur={(e) => (e.currentTarget.style.borderColor = errors.name ? "#e53e3e" : "rgba(255,255,255,0.1)")}
+              className={`register-input ${errors.name ? "has-error" : ""}`}
             />
-            {errors.name && <span style={styles.error}>{errors.name}</span>}
+            {errors.name && <span className="register-error">{errors.name}</span>}
           </div>
 
-          <div style={styles.inputGroup}>
-            <label style={styles.label} htmlFor="email">
+          <div className="register-input-group">
+            <label className="register-label" htmlFor="email">
               Email Address
             </label>
             <input
@@ -331,18 +172,13 @@ export default function Register() {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
-              style={{
-                ...styles.input,
-                ...(errors.email ? { borderColor: "#e53e3e" } : {}),
-              }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "#667eea")}
-              onBlur={(e) => (e.currentTarget.style.borderColor = errors.email ? "#e53e3e" : "#e2e8f0")}
+              className={`register-input ${errors.email ? "has-error" : ""}`}
             />
-            {errors.email && <span style={styles.error}>{errors.email}</span>}
+            {errors.email && <span className="register-error">{errors.email}</span>}
           </div>
 
-          <div style={styles.inputGroup}>
-            <label style={styles.label} htmlFor="password">
+          <div className="register-input-group">
+            <label className="register-label" htmlFor="password">
               Password
             </label>
             <input
@@ -352,18 +188,13 @@ export default function Register() {
               value={formData.password}
               onChange={handleChange}
               placeholder="Create a password"
-              style={{
-                ...styles.input,
-                ...(errors.password ? { borderColor: "#e53e3e" } : {}),
-              }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "#667eea")}
-              onBlur={(e) => (e.currentTarget.style.borderColor = errors.password ? "#e53e3e" : "#e2e8f0")}
+              className={`register-input ${errors.password ? "has-error" : ""}`}
             />
-            {errors.password && <span style={styles.error}>{errors.password}</span>}
+            {errors.password && <span className="register-error">{errors.password}</span>}
           </div>
 
-          <div style={styles.inputGroup}>
-            <label style={styles.label} htmlFor="confirmPassword">
+          <div className="register-input-group">
+            <label className="register-label" htmlFor="confirmPassword">
               Confirm Password
             </label>
             <input
@@ -373,69 +204,36 @@ export default function Register() {
               value={formData.confirmPassword}
               onChange={handleChange}
               placeholder="Confirm your password"
-              style={{
-                ...styles.input,
-                ...(errors.confirmPassword ? { borderColor: "#e53e3e" } : {}),
-              }}
-              onFocus={(e) => (e.currentTarget.style.borderColor = "#667eea")}
-              onBlur={(e) => (e.currentTarget.style.borderColor = errors.confirmPassword ? "#e53e3e" : "#e2e8f0")}
+              className={`register-input ${errors.confirmPassword ? "has-error" : ""}`}
             />
             {errors.confirmPassword && (
-              <span style={styles.error}>{errors.confirmPassword}</span>
+              <span className="register-error">{errors.confirmPassword}</span>
             )}
           </div>
 
           {errors.submit && (
-            <div style={styles.submitError}>{errors.submit}</div>
+            <div className="register-submit-error">{errors.submit}</div>
           )}
 
           <button
             type="submit"
-            style={{
-              ...styles.button,
-              ...(loading ? styles.buttonDisabled : {}),
-            }}
+            className="register-button"
             disabled={loading}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 6px 20px rgba(139, 92, 246, 0.5)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 4px 15px rgba(139, 92, 246, 0.4)";
-              }
-            }}
           >
             {loading ? "Creating Account..." : "Sign Up"}
           </button>
         </form>
 
-        <div style={styles.loginLink}>
+        <div className="register-login-link">
           Already have an account?{" "}
           <span
-            style={styles.loginLinkText}
+            className="register-login-button"
             onClick={() => (window.location.hash = "#/login")}
           >
             Sign In
           </span>
         </div>
       </div>
-
-      <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </div>
   );
 }

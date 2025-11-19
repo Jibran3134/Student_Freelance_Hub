@@ -1,0 +1,92 @@
+.post-page {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(180deg, #0e0a17 0%, #171228 60%, #130f20 100%);
+  color: #e5e7eb;
+  font-family: "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.post-wrapper {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+  text-align: center;
+}
+
+.post-heading {
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg, #f9fafb 0%, #d1d5db 20%, #8b5cf6 50%, #d1d5db 80%, #f9fafb 100%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: textShimmer 10s ease-in-out infinite;
+}
+
+.post-subline {
+  color: #9ca3af;
+  margin-bottom: 3rem;
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+
+.post-options {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.post-option {
+  flex: 1;
+  min-width: 280px;
+  padding: 2rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.post-option:hover {
+  transform: translateY(-4px);
+  border-color: #8b5cf6;
+  box-shadow: 0 12px 32px rgba(139, 92, 246, 0.3);
+}
+
+.post-option-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #f9fafb;
+}
+
+.post-option-text {
+  font-size: 0.95rem;
+  color: #9ca3af;
+  line-height: 1.5;
+}
+
+@keyframes textShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { auth, db, storage } from "../firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import styles from "./styles/upload-portfolio.module.css";
 
 export default function UploadPortfolio() {
   const [portfolioItems, setPortfolioItems] = useState([]);
@@ -230,269 +231,29 @@ export default function UploadPortfolio() {
     }
   };
 
-  const styles = {
-    container: {
-      minHeight: "100vh",
-      background: "linear-gradient(180deg, #0e0a17 0%, #171228 60%, #130f20 100%)",
-      padding: "2rem 1rem",
-      color: "#E5E7EB",
-      fontFamily: "'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
-    },
-    content: {
-      maxWidth: "1200px",
-      margin: "0 auto",
-    },
-    header: {
-      background: "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
-      border: "1px solid rgba(255,255,255,0.06)",
-      borderRadius: "20px",
-      boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)",
-      padding: "2rem",
-      marginBottom: "2rem",
-      textAlign: "center",
-    },
-    title: {
-      fontSize: "2rem",
-      fontWeight: 700,
-      color: "#F9FAFB",
-      marginBottom: "0.5rem",
-    },
-    subtitle: {
-      fontSize: "1rem",
-      color: "#9CA3AF",
-    },
-    mainContent: {
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 400px), 1fr))",
-      gap: "2rem",
-    },
-    formCard: {
-      background: "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
-      border: "1px solid rgba(255,255,255,0.06)",
-      borderRadius: "20px",
-      boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)",
-      padding: "2rem",
-    },
-    previewCard: {
-      background: "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
-      border: "1px solid rgba(255,255,255,0.06)",
-      borderRadius: "20px",
-      boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)",
-      padding: "2rem",
-      maxHeight: "calc(100vh - 200px)",
-      overflowY: "auto",
-    },
-    sectionTitle: {
-      fontSize: "1.5rem",
-      fontWeight: 700,
-      color: "#F3F4F6",
-      marginBottom: "1.5rem",
-    },
-    form: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "1.25rem",
-    },
-    inputGroup: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "0.5rem",
-    },
-    label: {
-      fontSize: "0.875rem",
-      fontWeight: 600,
-      color: "#D1D5DB",
-    },
-    input: {
-      padding: "0.875rem 1rem",
-      border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: "12px",
-      fontSize: "1rem",
-      transition: "all 0.3s ease",
-      outline: "none",
-      fontFamily: "inherit",
-      background: "rgba(255,255,255,0.03)",
-      color: "#E5E7EB",
-    },
-    textarea: {
-      padding: "0.875rem 1rem",
-      border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: "12px",
-      fontSize: "1rem",
-      transition: "all 0.3s ease",
-      outline: "none",
-      fontFamily: "inherit",
-      resize: "vertical",
-      minHeight: "100px",
-      background: "rgba(255,255,255,0.03)",
-      color: "#E5E7EB",
-    },
-    error: {
-      color: "#e53e3e",
-      fontSize: "0.875rem",
-      marginTop: "0.25rem",
-    },
-    imageUpload: {
-      border: "1px dashed rgba(255,255,255,0.2)",
-      borderRadius: "12px",
-      padding: "2rem",
-      textAlign: "center",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-      background: "rgba(255,255,255,0.02)",
-    },
-    imageUploadHover: {
-      borderColor: "#8B5CF6",
-      background: "rgba(255,255,255,0.04)",
-    },
-    imagePreview: {
-      width: "100%",
-      maxHeight: "200px",
-      objectFit: "cover",
-      borderRadius: "12px",
-      marginTop: "1rem",
-    },
-    fileInput: {
-      display: "none",
-    },
-    fileInputLabel: {
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: "0.5rem",
-      cursor: "pointer",
-    },
-    addButton: {
-      padding: "0.875rem 1.5rem",
-      borderRadius: "12px",
-      fontSize: "1rem",
-      fontWeight: 600,
-      border: "none",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-      background: "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)",
-      color: "#ffffff",
-      boxShadow: "0 4px 15px rgba(139, 92, 246, 0.4)",
-    },
-    itemsList: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "1rem",
-    },
-    itemCard: {
-      background: "rgba(255,255,255,0.03)",
-      border: "1px solid rgba(255,255,255,0.06)",
-      borderRadius: "12px",
-      overflow: "hidden",
-      transition: "all 0.3s ease",
-    },
-    itemImage: {
-      width: "100%",
-      height: "150px",
-      objectFit: "cover",
-    },
-    itemContent: {
-      padding: "1rem",
-    },
-    itemHeader: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "flex-start",
-      marginBottom: "0.5rem",
-    },
-    itemTitle: {
-      fontSize: "1rem",
-      fontWeight: 600,
-      color: "#F3F4F6",
-      flex: 1,
-    },
-    removeButton: {
-      background: "#e53e3e",
-      color: "#ffffff",
-      border: "none",
-      borderRadius: "6px",
-      width: "28px",
-      height: "28px",
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: "1.2rem",
-      fontWeight: 700,
-      transition: "all 0.3s ease",
-    },
-    itemDescription: {
-      fontSize: "0.875rem",
-      color: "#9CA3AF",
-      lineHeight: "1.5",
-    },
-    emptyState: {
-      textAlign: "center",
-      padding: "3rem 1rem",
-      color: "#6B7280",
-    },
-    actionButtons: {
-      display: "flex",
-      gap: "1rem",
-      marginTop: "2rem",
-      paddingTop: "2rem",
-      borderTop: "2px solid #e2e8f0",
-    },
-    button: {
-      flex: 1,
-      padding: "0.875rem 1.5rem",
-      borderRadius: "12px",
-      fontSize: "1rem",
-      fontWeight: 600,
-      border: "none",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-    },
-    primaryButton: {
-      background: "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)",
-      color: "#ffffff",
-      boxShadow: "0 4px 15px rgba(139, 92, 246, 0.4)",
-    },
-    secondaryButton: {
-      background: "rgba(255,255,255,0.03)",
-      color: "#8B5CF6",
-      border: "1px solid #8B5CF6",
-    },
-    buttonDisabled: {
-      opacity: 0.6,
-      cursor: "not-allowed",
-    },
-    submitError: {
-      color: "#e53e3e",
-      fontSize: "0.875rem",
-      textAlign: "center",
-      marginTop: "0.5rem",
-    },
-  };
-
   return (
-    <div style={styles.container}>
-      <div style={styles.content}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>Upload Portfolio</h1>
-          <p style={styles.subtitle}>
+    <div className={styles.container}>
+      <div className={styles.content}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Upload Portfolio</h1>
+          <p className={styles.subtitle}>
             Showcase your best work to potential clients
           </p>
         </div>
 
-        <div style={styles.mainContent}>
+        <div className={styles.mainContent}>
           {/* Form Section */}
-          <div style={styles.formCard}>
-            <h2 style={styles.sectionTitle}>Add New Item</h2>
+          <div className={styles.formCard}>
+            <h2 className={styles.sectionTitle}>Add New Item</h2>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 handleAddItem();
               }}
-              style={styles.form}
+              className={styles.form}
             >
-              <div style={styles.inputGroup}>
-                <label style={styles.label} htmlFor="title">
+              <div className={styles.inputGroup}>
+                <label className={styles.label} htmlFor="title">
                   Project Title
                 </label>
                 <input
@@ -502,18 +263,13 @@ export default function UploadPortfolio() {
                   value={currentItem.title}
                   onChange={handleInputChange}
                   placeholder="Enter project title"
-                  style={{
-                    ...styles.input,
-                    ...(errors.title ? { borderColor: "#e53e3e" } : {}),
-                  }}
-                  onFocus={(e) => (e.currentTarget.style.borderColor = "#8B5CF6")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = errors.title ? "#e53e3e" : "rgba(255,255,255,0.1)")}
+                  className={`${styles.input} ${errors.title ? styles.inputError : ""}`}
                 />
-                {errors.title && <span style={styles.error}>{errors.title}</span>}
+                {errors.title && <span className={styles.error}>{errors.title}</span>}
               </div>
 
-              <div style={styles.inputGroup}>
-                <label style={styles.label} htmlFor="description">
+              <div className={styles.inputGroup}>
+                <label className={styles.label} htmlFor="description">
                   Description
                 </label>
                 <textarea
@@ -522,32 +278,17 @@ export default function UploadPortfolio() {
                   value={currentItem.description}
                   onChange={handleInputChange}
                   placeholder="Describe your project..."
-                  style={{
-                    ...styles.textarea,
-                    ...(errors.description ? { borderColor: "#e53e3e" } : {}),
-                  }}
-                  onFocus={(e) => (e.currentTarget.style.borderColor = "#8B5CF6")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = errors.description ? "#e53e3e" : "rgba(255,255,255,0.1)")}
+                  className={`${styles.textarea} ${errors.description ? styles.textareaError : ""}`}
                 />
                 {errors.description && (
-                  <span style={styles.error}>{errors.description}</span>
+                  <span className={styles.error}>{errors.description}</span>
                 )}
               </div>
 
-              <div style={styles.inputGroup}>
-                <label style={styles.label}>Project Image</label>
-                <div
-                  style={styles.imageUpload}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "#8B5CF6";
-                    e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
-                    e.currentTarget.style.background = "rgba(255,255,255,0.02)";
-                  }}
-                >
-                  <label htmlFor="portfolioImage" style={styles.fileInputLabel}>
+              <div className={styles.inputGroup}>
+                <label className={styles.label}>Project Image</label>
+                <div className={styles.imageUpload}>
+                  <label htmlFor="portfolioImage" className={styles.fileInputLabel}>
                     <svg
                       width="48"
                       height="48"
@@ -574,35 +315,27 @@ export default function UploadPortfolio() {
                     id="portfolioImage"
                     accept="image/*"
                     onChange={handleImageChange}
-                    style={styles.fileInput}
+                    className={styles.fileInput}
                   />
                   {currentItem.imagePreview && (
                     <img
                       src={currentItem.imagePreview}
                       alt="Preview"
-                      style={styles.imagePreview}
+                      className={styles.imagePreview}
                     />
                   )}
                   {currentItem.image && (
-                    <p style={{ fontSize: "0.875rem", color: "#10B981", marginTop: "0.5rem" }}>
+                    <p className={styles.fileSelected}>
                       ✓ File selected: {currentItem.image.name} ({(currentItem.image.size / 1024).toFixed(2)} KB)
                     </p>
                   )}
                 </div>
-                {errors.image && <span style={styles.error}>{errors.image}</span>}
+                {errors.image && <span className={styles.error}>{errors.image}</span>}
               </div>
 
               <button
                 type="submit"
-                style={styles.addButton}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                  e.currentTarget.style.boxShadow = "0 6px 20px rgba(139, 92, 246, 0.5)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 4px 15px rgba(139, 92, 246, 0.4)";
-                }}
+                className={styles.addButton}
               >
                 Add to Portfolio
               </button>
@@ -610,87 +343,55 @@ export default function UploadPortfolio() {
           </div>
 
           {/* Preview Section */}
-          <div style={styles.previewCard}>
-            <h2 style={styles.sectionTitle}>
+          <div className={styles.previewCard}>
+            <h2 className={styles.sectionTitle}>
               Portfolio Items ({portfolioItems.length})
             </h2>
             {portfolioItems.length > 0 ? (
-              <div style={styles.itemsList}>
+              <div className={styles.itemsList}>
                 {portfolioItems.map((item) => (
-                  <div key={item.id} style={styles.itemCard}>
+                  <div key={item.id} className={styles.itemCard}>
                     <img
                       src={item.imagePreview}
                       alt={item.title}
-                      style={styles.itemImage}
+                      className={styles.itemImage}
                     />
-                    <div style={styles.itemContent}>
-                      <div style={styles.itemHeader}>
-                        <h3 style={styles.itemTitle}>{item.title}</h3>
+                    <div className={styles.itemContent}>
+                      <div className={styles.itemHeader}>
+                        <h3 className={styles.itemTitle}>{item.title}</h3>
                         <button
                           type="button"
-                          style={styles.removeButton}
+                          className={styles.removeButton}
                           onClick={() => handleRemoveItem(item.id)}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = "#c53030";
-                            e.currentTarget.style.transform = "scale(1.1)";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = "#e53e3e";
-                            e.currentTarget.style.transform = "scale(1)";
-                          }}
                         >
                           ×
                         </button>
                       </div>
-                      <p style={styles.itemDescription}>{item.description}</p>
+                      <p className={styles.itemDescription}>{item.description}</p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div style={styles.emptyState}>
+              <div className={styles.emptyState}>
                 <p>No items added yet. Add your first project above!</p>
               </div>
             )}
 
             {portfolioItems.length > 0 && (
-              <div style={styles.actionButtons}>
+              <div className={styles.actionButtons}>
                 <button
                   type="button"
-                  style={{ ...styles.button, ...styles.secondaryButton }}
+                  className={`${styles.button} ${styles.secondaryButton}`}
                   onClick={() => (window.location.hash = "#/profile")}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.03)";
-                    e.currentTarget.style.transform = "translateY(0)";
-                  }}
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
-                  style={{
-                    ...styles.button,
-                    ...styles.primaryButton,
-                    ...(loading ? styles.buttonDisabled : {}),
-                  }}
+                  className={`${styles.button} ${styles.primaryButton} ${loading ? styles.buttonDisabled : ""}`}
                   onClick={handleSaveAll}
                   disabled={loading}
-                  onMouseEnter={(e) => {
-                    if (!loading) {
-                      e.currentTarget.style.transform = "translateY(-2px)";
-                      e.currentTarget.style.boxShadow = "0 6px 20px rgba(139, 92, 246, 0.5)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!loading) {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.boxShadow = "0 4px 15px rgba(139, 92, 246, 0.4)";
-                    }
-                  }}
                 >
                   {loading ? "Saving..." : `Save ${portfolioItems.length} Item${portfolioItems.length > 1 ? "s" : ""}`}
                 </button>
@@ -698,12 +399,11 @@ export default function UploadPortfolio() {
             )}
 
             {errors.submit && (
-              <div style={styles.submitError}>{errors.submit}</div>
+              <div className={styles.submitError}>{errors.submit}</div>
             )}
           </div>
         </div>
       </div>
-
     </div>
   );
 }

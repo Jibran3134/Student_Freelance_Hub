@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { auth } from "../firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import "./styles/login.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -66,168 +67,16 @@ export default function Login() {
     alert("Forgot password functionality will be implemented here");
   };
 
-  const styles = {
-    container: {
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "linear-gradient(180deg, #0e0a17 0%, #171228 60%, #130f20 100%)",
-      padding: "2rem 1rem",
-      color: "#E5E7EB",
-      fontFamily: "'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
-    },
-    card: {
-      background: "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
-      border: "1px solid rgba(255,255,255,0.06)",
-      borderRadius: "20px",
-      boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)",
-      padding: "3rem",
-      width: "100%",
-      maxWidth: "440px",
-      animation: "fadeInUp 0.6s ease-out",
-    },
-    title: {
-      fontSize: "2rem",
-      fontWeight: 700,
-      color: "#F9FAFB",
-      marginBottom: "0.5rem",
-      textAlign: "center",
-    },
-    subtitle: {
-      fontSize: "0.95rem",
-      color: "#9CA3AF",
-      textAlign: "center",
-      marginBottom: "2rem",
-    },
-    form: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "1.25rem",
-    },
-    inputGroup: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "0.5rem",
-    },
-    label: {
-      fontSize: "0.875rem",
-      fontWeight: 600,
-      color: "#D1D5DB",
-    },
-    input: {
-      padding: "0.875rem 1rem",
-      border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: "12px",
-      fontSize: "1rem",
-      transition: "all 0.3s ease",
-      outline: "none",
-      fontFamily: "inherit",
-      background: "rgba(255,255,255,0.03)",
-      color: "#E5E7EB",
-    },
-    error: {
-      color: "#e53e3e",
-      fontSize: "0.875rem",
-      marginTop: "0.25rem",
-    },
-    forgotPassword: {
-      textAlign: "right",
-      marginTop: "-0.5rem",
-    },
-    forgotPasswordLink: {
-      color: "#8B5CF6",
-      fontSize: "0.875rem",
-      fontWeight: 600,
-      textDecoration: "none",
-      cursor: "pointer",
-      transition: "color 0.3s ease",
-    },
-    button: {
-      padding: "0.875rem 1.5rem",
-      borderRadius: "12px",
-      fontSize: "1rem",
-      fontWeight: 600,
-      border: "none",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-      background: "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)",
-      color: "#ffffff",
-      marginTop: "0.5rem",
-      boxShadow: "0 4px 15px rgba(139, 92, 246, 0.4)",
-    },
-    buttonDisabled: {
-      opacity: 0.6,
-      cursor: "not-allowed",
-    },
-    divider: {
-      display: "flex",
-      alignItems: "center",
-      margin: "1.5rem 0",
-      color: "#6B7280",
-      fontSize: "0.875rem",
-    },
-    dividerLine: {
-      flex: 1,
-      height: "1px",
-      background: "rgba(255,255,255,0.1)",
-    },
-    dividerText: {
-      padding: "0 1rem",
-    },
-    socialButtons: {
-      display: "flex",
-      gap: "1rem",
-      marginBottom: "1.5rem",
-    },
-    socialButton: {
-      flex: 1,
-      padding: "0.75rem",
-      borderRadius: "12px",
-      border: "1px solid rgba(255,255,255,0.1)",
-      background: "rgba(255,255,255,0.03)",
-      cursor: "pointer",
-      transition: "all 0.3s ease",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "0.5rem",
-      fontSize: "0.875rem",
-      fontWeight: 600,
-      color: "#D1D5DB",
-    },
-    signupLink: {
-      textAlign: "center",
-      marginTop: "1.5rem",
-      fontSize: "0.875rem",
-      color: "#9CA3AF",
-    },
-    signupLinkText: {
-      color: "#8B5CF6",
-      fontWeight: 600,
-      textDecoration: "none",
-      cursor: "pointer",
-    },
-    submitError: {
-      color: "#e53e3e",
-      fontSize: "0.875rem",
-      textAlign: "center",
-      marginTop: "0.5rem",
-    },
-  };
-
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Welcome Back</h1>
-        <p style={styles.subtitle}>Sign in to your account to continue</p>
+    <div className="login-page">
+      <div className="login-card">
+        <h1 className="login-title">Welcome Back</h1>
+        <p className="login-subtitle">Sign in to your account to continue</p>
 
-        <div style={styles.socialButtons}>
+        <div className="login-social-buttons">
           <button
             type="button"
-            style={styles.socialButton}
-            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#8B5CF6")}
-            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+            className="login-social-button"
             onClick={() => handleSocialLogin("Google")}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -252,9 +101,7 @@ export default function Login() {
           </button>
           <button
             type="button"
-            style={styles.socialButton}
-            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#8B5CF6")}
-            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)")}
+            className="login-social-button"
             onClick={() => handleSocialLogin("GitHub")}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -264,15 +111,15 @@ export default function Login() {
           </button>
         </div>
 
-        <div style={styles.divider}>
-          <div style={styles.dividerLine}></div>
-          <span style={styles.dividerText}>or sign in with email</span>
-          <div style={styles.dividerLine}></div>
+        <div className="login-divider">
+          <div className="login-divider-line"></div>
+          <span className="login-divider-text">or sign in with email</span>
+          <div className="login-divider-line"></div>
         </div>
 
-        <form onSubmit={loginUser} style={styles.form}>
-          <div style={styles.inputGroup}>
-            <label style={styles.label} htmlFor="email">
+        <form onSubmit={loginUser} className="login-form">
+          <div className="login-input-group">
+            <label className="login-label" htmlFor="email">
               Email Address
             </label>
             <input
@@ -282,18 +129,13 @@ export default function Login() {
               value={email}
               onChange={handleChange}
               placeholder="Enter your email"
-              style={{
-                ...styles.input,
-                ...(errors.email ? { borderColor: "#e53e3e" } : {}),
-              }}
-            onFocus={(e) => (e.currentTarget.style.borderColor = "#8B5CF6")}
-            onBlur={(e) => (e.currentTarget.style.borderColor = errors.email ? "#e53e3e" : "rgba(255,255,255,0.1)")}
+              className={`login-input ${errors.email ? "has-error" : ""}`}
             />
-            {errors.email && <span style={styles.error}>{errors.email}</span>}
+            {errors.email && <span className="login-error">{errors.email}</span>}
           </div>
 
-          <div style={styles.inputGroup}>
-            <label style={styles.label} htmlFor="password">
+          <div className="login-input-group">
+            <label className="login-label" htmlFor="password">
               Password
             </label>
             <input
@@ -303,80 +145,43 @@ export default function Login() {
               value={password}
               onChange={handleChange}
               placeholder="Enter your password"
-              style={{
-                ...styles.input,
-                ...(errors.password ? { borderColor: "#e53e3e" } : {}),
-              }}
-            onFocus={(e) => (e.currentTarget.style.borderColor = "#8B5CF6")}
-            onBlur={(e) => (e.currentTarget.style.borderColor = errors.password ? "#e53e3e" : "rgba(255,255,255,0.1)")}
+              className={`login-input ${errors.password ? "has-error" : ""}`}
             />
-            {errors.password && <span style={styles.error}>{errors.password}</span>}
+            {errors.password && <span className="login-error">{errors.password}</span>}
           </div>
 
-          <div style={styles.forgotPassword}>
+          <div className="login-forgot">
             <span
-              style={styles.forgotPasswordLink}
+              className="login-forgot-button"
               onClick={handleForgotPassword}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#A78BFA")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#8B5CF6")}
             >
               Forgot Password?
             </span>
           </div>
 
           {errors.submit && (
-            <div style={styles.submitError}>{errors.submit}</div>
+            <div className="login-submit-error">{errors.submit}</div>
           )}
 
           <button
             type="submit"
-            style={{
-              ...styles.button,
-              ...(loading ? styles.buttonDisabled : {}),
-            }}
+            className="login-button"
             disabled={loading}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 6px 20px rgba(139, 92, 246, 0.5)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 4px 15px rgba(139, 92, 246, 0.4)";
-              }
-            }}
           >
             {loading ? "Signing In..." : "Sign In"}
           </button>
         </form>
 
-        <div style={styles.signupLink}>
+        <div className="login-signup">
           Don't have an account?{" "}
           <span
-            style={styles.signupLinkText}
+            className="login-signup-button"
             onClick={() => (window.location.hash = "#/register")}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#764ba2")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#667eea")}
           >
             Sign Up
           </span>
         </div>
       </div>
-
-      <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </div>
   );
 }
