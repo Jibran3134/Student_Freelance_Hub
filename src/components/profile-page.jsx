@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import styles from "./styles/profile-page.module.css";
+import AverageRating from "./AverageRating";
+import StudentReviews from "./StudentReviews";
+import PaymentsTable from "./PaymentsTable";
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
@@ -107,9 +110,14 @@ export default function ProfilePage() {
             alt="Profile"
             className={styles.profilePicture}
           />
-          <h1 className={styles.name}>{profileData.name}</h1>
-          <p className={styles.email}>{profileData.email}</p>
-          <div className={styles.actionButtons}>
+          <h1 style={styles.name}>{profileData.name}</h1>
+          <p style={styles.email}>{profileData.email}</p>
+          {user && (
+            <div style={{ marginBottom: "1.5rem" }}>
+              <AverageRating studentId={user.uid} size="large" />
+            </div>
+          )}
+          <div style={styles.actionButtons}>
             <button
               className={`${styles.button} ${styles.primaryButton}`}
               onClick={() => (window.location.hash = "#/update-profile")}
@@ -165,9 +173,9 @@ export default function ProfilePage() {
         </div>
 
         {/* Portfolio Section */}
-        <div className={styles.card} style={{ marginTop: "2rem" }}>
-          <h2 className={styles.cardTitle}>
-            <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div style={{ ...styles.card, marginTop: "2rem" }}>
+          <h2 style={styles.cardTitle}>
+            <svg style={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
             Portfolio
@@ -197,6 +205,20 @@ export default function ProfilePage() {
             </div>
           )}
         </div>
+
+        {/* Reviews Section */}
+        {user && (
+          <div style={{ marginTop: "2rem" }}>
+            <StudentReviews studentId={user.uid} />
+          </div>
+        )}
+
+        {/* Payments Table Section */}
+        {user && (
+          <div style={{ marginTop: "2rem" }}>
+            <PaymentsTable studentId={user.uid} />
+          </div>
+        )}
       </div>
     </div>
   );
