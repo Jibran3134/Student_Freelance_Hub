@@ -89,6 +89,17 @@
   transform: translateY(-2px);
 }
 
+.dangerButton {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid #f87171;
+}
+
+.dangerButton:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #fecaca;
+}
+
 .mainContent {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -182,6 +193,53 @@
   text-align: center;
   padding: 3rem 1rem;
   color: #6B7280;
+}
+
+.listingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.listingCard {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 180px;
+}
+
+.listingCategory {
+  font-size: 0.8rem;
+  color: #a78bfa;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.listingTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #f3f4f6;
+  margin: 0.35rem 0;
+}
+
+.listingPrice {
+  font-size: 0.9rem;
+  color: #fbbf24;
+}
+
+.listingDate {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.listingActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 .icon {

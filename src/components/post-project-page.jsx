@@ -1,11 +1,35 @@
-import React, { useState } from "react";
-import { db } from "../firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { auth, db } from "../firebase";
+import { collection, addDoc, serverTimestamp, Timestamp } from "firebase/firestore";
 import "./styles/post-project-page.css";
+
+const normalizeEmail = (email) => email.trim().toLowerCase();
+
+const getPriceBucket = (price) => {
+  if (!price && price !== 0) return "unspecified";
+  if (price < 5000) return "budget";
+  if (price < 20000) return "standard";
+  return "premium";
+};
+
+const buildKeywords = (title = "", description = "") => {
+  const tokens = new Set();
+  const pushTokens = (text) => {
+    text
+      .toLowerCase()
+      .split(/[^a-z0-9]+/i)
+      .filter(Boolean)
+      .forEach((word) => tokens.add(word));
+  };
+  pushTokens(title);
+  pushTokens(description);
+  return Array.from(tokens).slice(0, 30);
+};
 
 export default function PostProjectPage() {
   const [formData, setFormData] = useState({
     personName: "",
+    email: "",
     projectTitle: "",
     description: "",
     category: "",
@@ -19,6 +43,12 @@ export default function PostProjectPage() {
     preferredCommunication: "",
   });
   const [status, setStatus] = useState({ submitting: false, success: null, error: null });
+
+  useEffect(() => {
+    if (auth?.currentUser?.email) {
+      setFormData((prev) => ({ ...prev, email: auth.currentUser.email }));
+    }
+  }, []);
 
   const categories = [
     "Web Development",
@@ -66,16 +96,53 @@ export default function PostProjectPage() {
     setStatus({ submitting: true, success: null, error: null });
 
     try {
+      if (!formData.email.trim()) {
+        throw new Error("Email is required to track your projects.");
+      }
+      const normalizedEmail = normalizeEmail(formData.email);
+
       // Save to Firebase Firestore
       await addDoc(collection(db, "projects"), {
         ...formData,
         createdAt: serverTimestamp(),
+      });
+
+      const normalizedTitle = formData.projectTitle.trim();
+      const normalizedDescription = formData.description.trim();
+      const priceNumber = Number(formData.budgetMax || formData.budgetMin || 0);
+      const deadlineDate = formData.deadline ? Timestamp.fromDate(new Date(formData.deadline)) : null;
+
+      await addDoc(collection(db, "projectsServices"), {
+        title: normalizedTitle,
+        titleLowercase: normalizedTitle.toLowerCase(),
+        description: normalizedDescription,
+        category: formData.category,
+        price: priceNumber,
+        priceBucket: getPriceBucket(priceNumber),
+        paymentType: formData.paymentType,
+        budgetMin: formData.budgetMin,
+        budgetMax: formData.budgetMax,
+        currency: formData.currency,
+        deadline: formData.deadline,
+        date: formData.deadline,
+        dateTimestamp: deadlineDate,
+        requiredSkills: formData.requiredSkills,
+        numberOfFreelancers: formData.numberOfFreelancers,
+        preferredCommunication: formData.preferredCommunication,
+        personName: formData.personName,
+        ownerEmail: normalizedEmail,
+        userId: auth?.currentUser?.uid || "",
+        keywords: buildKeywords(normalizedTitle, normalizedDescription),
+        images: [],
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
       
       setStatus({ submitting: false, success: "Project posted successfully!", error: null });
       // Reset form
       setFormData({
         personName: "",
+        email: auth?.currentUser?.email || "",
         projectTitle: "",
         description: "",
         category: "",
@@ -109,6 +176,18 @@ export default function PostProjectPage() {
               type="text"
               placeholder="John Doe"
               value={formData.personName}
+              onChange={updateField}
+              className="post-project-input"
+              required
+            />
+
+            <label htmlFor="email" className="post-project-label">Your Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="you@example.com"
+              value={formData.email}
               onChange={updateField}
               className="post-project-input"
               required
@@ -309,3 +388,4 @@ export default function PostProjectPage() {
     </div>
   );
 }
+

@@ -14,8 +14,14 @@ import AdminDashboard from "./components/admin-dashboard";
 import BrowsePage from "./components/browse-page";
 import UpdateProfile from "./components/update-profile";
 import UploadPortfolio from "./components/upload-portfolio";
+import FirebaseAddPage from "./components/firebase-add-page";
+import FirebaseListingPage from "./components/firebase-listing-page";
+import FirebaseDetailPage from "./components/firebase-detail-page";
+import FirebaseEditPage from "./components/firebase-edit-page";
+import FirebaseDeletePage from "./components/firebase-delete-page";
+import FirebaseProfilePage from "./components/firebase-profile-page";
 
- function App() {
+function App() {
   const [route, setRoute] = useState(window.location.hash || "#/");
 
   useEffect(() => {
@@ -27,6 +33,21 @@ import UploadPortfolio from "./components/upload-portfolio";
   const isLanding = route === "#/" || route === "";
 
   const renderPage = () => {
+    if (route.startsWith("#/firebase-detail/")) {
+      const id = decodeURIComponent(route.replace("#/firebase-detail/", ""));
+      return <FirebaseDetailPage itemId={id} />;
+    }
+
+    if (route.startsWith("#/firebase-edit/")) {
+      const id = decodeURIComponent(route.replace("#/firebase-edit/", ""));
+      return <FirebaseEditPage itemId={id} />;
+    }
+
+    if (route.startsWith("#/firebase-delete/")) {
+      const id = decodeURIComponent(route.replace("#/firebase-delete/", ""));
+      return <FirebaseDeletePage itemId={id} />;
+    }
+
     switch (route) {
       case "#/home":
         return <HomePage />;
@@ -38,6 +59,12 @@ import UploadPortfolio from "./components/upload-portfolio";
         return <UpdateProfile />;
       case "#/upload-portfolio":
         return <UploadPortfolio />;
+      case "#/firebase-add":
+        return <FirebaseAddPage />;
+      case "#/firebase-list":
+        return <FirebaseListingPage />;
+      case "#/firebase-profile":
+        return <FirebaseProfilePage />;
       case "#/post":
         return <PostPage />;
       case "#/post-service":

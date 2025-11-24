@@ -1,11 +1,35 @@
-import React, { useState } from "react";
-import { db } from "../firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { auth, db } from "../firebase";
+import { collection, addDoc, serverTimestamp, Timestamp } from "firebase/firestore";
 import "./styles/post-service-page.css";
+
+const normalizeEmail = (email) => email.trim().toLowerCase();
+
+const getPriceBucket = (price) => {
+  if (!price && price !== 0) return "unspecified";
+  if (price < 5000) return "budget";
+  if (price < 20000) return "standard";
+  return "premium";
+};
+
+const buildKeywords = (title = "", description = "") => {
+  const tokens = new Set();
+  const pushTokens = (text) => {
+    text
+      .toLowerCase()
+      .split(/[^a-z0-9]+/i)
+      .filter(Boolean)
+      .forEach((word) => tokens.add(word));
+  };
+  pushTokens(title);
+  pushTokens(description);
+  return Array.from(tokens).slice(0, 30);
+};
 
 export default function PostServicePage() {
   const [formData, setFormData] = useState({
     userName: "",
+    email: "",
     title: "",
     category: "",
     description: "",
@@ -20,6 +44,12 @@ export default function PostServicePage() {
     completionTime: "",
   });
   const [status, setStatus] = useState({ submitting: false, success: null, error: null });
+
+  useEffect(() => {
+    if (auth?.currentUser?.email) {
+      setFormData((prev) => ({ ...prev, email: auth.currentUser.email }));
+    }
+  }, []);
 
   const categories = [
     "Web Development",
@@ -56,16 +86,54 @@ export default function PostServicePage() {
     setStatus({ submitting: true, success: null, error: null });
 
     try {
+      if (!formData.email.trim()) {
+        throw new Error("Email is required to track your services.");
+      }
+      const normalizedEmail = normalizeEmail(formData.email);
+
       // Save to Firebase Firestore
       await addDoc(collection(db, "services"), {
         ...formData,
         createdAt: serverTimestamp(),
+      });
+
+      const normalizedTitle = formData.title.trim();
+      const normalizedDescription = formData.description.trim();
+      const priceSource =
+        formData.pricingType === "single"
+          ? formData.singlePrice
+          : formData.basicPrice || formData.standardPrice || formData.premiumPrice;
+      const priceNumber = Number((priceSource || "0").toString().replace(/[^0-9.]/g, ""));
+      const today = new Date().toISOString().split("T")[0];
+
+      await addDoc(collection(db, "projectsServices"), {
+        title: normalizedTitle,
+        titleLowercase: normalizedTitle.toLowerCase(),
+        description: normalizedDescription,
+        category: formData.category,
+        price: priceNumber,
+        priceBucket: getPriceBucket(priceNumber),
+        pricingType: formData.pricingType,
+        singlePrice: formData.singlePrice,
+        basicPrice: formData.basicPrice,
+        standardPrice: formData.standardPrice,
+        premiumPrice: formData.premiumPrice,
+        completionTime: formData.completionTime,
+        date: today,
+        dateTimestamp: Timestamp.fromDate(new Date()),
+        ownerEmail: normalizedEmail,
+        userId: auth?.currentUser?.uid || "",
+        keywords: buildKeywords(normalizedTitle, normalizedDescription),
+        images: [],
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
       
       setStatus({ submitting: false, success: "Service posted successfully!", error: null });
       // Reset form
       setFormData({
         userName: "",
+        email: auth?.currentUser?.email || "",
         title: "",
         category: "",
         description: "",
@@ -100,6 +168,18 @@ export default function PostServicePage() {
               type="text"
               placeholder="John Doe"
               value={formData.userName}
+              onChange={updateField}
+              className="post-service-input"
+              required
+            />
+
+            <label htmlFor="email" className="post-service-label">Your Email</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="you@example.com"
+              value={formData.email}
               onChange={updateField}
               className="post-service-input"
               required
@@ -292,5 +372,6 @@ export default function PostServicePage() {
     </div>
   );
 }
+
 
 

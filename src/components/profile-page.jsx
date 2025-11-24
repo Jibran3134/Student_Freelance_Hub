@@ -17,6 +17,35 @@ export default function ProfilePage() {
     portfolioItems: [],
   });
   const [loading, setLoading] = useState(true);
+  const [userListings, setUserListings] = useState([]);
+
+  const loadListingsByEmail = async (email) => {
+    const normalizedEmail = (email || "").trim().toLowerCase();
+    if (!normalizedEmail) {
+      setUserListings([]);
+      return;
+    }
+    try {
+      const listingsQuery = query(
+        collection(db, "projectsServices"),
+        where("ownerEmail", "==", normalizedEmail)
+      );
+      const listingsSnapshot = await getDocs(listingsQuery);
+      const listingsData = listingsSnapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
+      }));
+      listingsData.sort((a, b) => {
+        const aTime = a.createdAt?.seconds || 0;
+        const bTime = b.createdAt?.seconds || 0;
+        return bTime - aTime;
+      });
+      setUserListings(listingsData);
+    } catch (err) {
+      console.error("Error fetching listings:", err);
+      setUserListings([]);
+    }
+  };
 
   useEffect(() => {
     const fetchUserData = async (currentUser) => {
@@ -32,20 +61,23 @@ export default function ProfilePage() {
 
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
+          const derivedEmail = userData.email || currentUser.email || "";
           setProfileData((prev) => ({
             ...prev,
             name: userData.name || "",
-            email: currentUser.email || userData.email || "",
+            email: derivedEmail,
             skills: userData.skills || [],
             education: userData.education || "",
             profilePicture: userData.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
           }));
+          await loadListingsByEmail(derivedEmail);
         } else {
           // If profile doesn't exist, use email from auth
           setProfileData((prev) => ({
             ...prev,
             email: currentUser.email || "",
           }));
+          await loadListingsByEmail(currentUser.email || "");
         }
 
         // Fetch portfolio items from Firestore
@@ -205,6 +237,63 @@ export default function ProfilePage() {
             </div>
           )}
         </div>
+
+        {/* My Listings Section */}
+        {user && (
+          <div className={styles.card} style={{ marginTop: "2rem" }}>
+            <h2 className={styles.cardTitle}>
+              <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4m-9 4v6"
+                />
+              </svg>
+              Your Projects & Services
+            </h2>
+            {userListings.length ? (
+              <div className={styles.listingsGrid}>
+                {userListings.map((item) => (
+                  <div key={item.id} className={styles.listingCard}>
+                    <div>
+                      <p className={styles.listingCategory}>
+                        {item.category || "Uncategorized"}
+                      </p>
+                      <h3 className={styles.listingTitle}>{item.title}</h3>
+                      <p className={styles.listingPrice}>
+                        {item.price ? `${item.price.toLocaleString()} PKR` : "Price not set"}
+                      </p>
+                      <p className={styles.listingDate}>
+                        {item.date ? new Date(item.date).toLocaleDateString() : "No date"}
+                      </p>
+                    </div>
+                    <div className={styles.listingActions}>
+                      <button
+                        type="button"
+                        className={`${styles.button} ${styles.secondaryButton}`}
+                        onClick={() => (window.location.hash = `#/firebase-edit/${item.id}`)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className={`${styles.button} ${styles.dangerButton}`}
+                        onClick={() => (window.location.hash = `#/firebase-delete/${item.id}`)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className={styles.emptyState}>
+                <p>You haven’t posted any projects or services yet.</p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Reviews Section */}
         {user && (

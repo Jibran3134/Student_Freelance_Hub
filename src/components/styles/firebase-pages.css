@@ -1,0 +1,410 @@
+/* Shared styling for Firebase CRUD demo pages */
+.firebase-page {
+  min-height: 100vh;
+  padding: 2rem 1rem 4rem;
+  background: #f5f6fb;
+}
+
+.firebase-card {
+  max-width: 960px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 10px 35px rgba(15, 23, 42, 0.08);
+}
+
+.firebase-page h1 {
+  margin-bottom: 0.5rem;
+  text-align: center;
+  font-size: 2rem;
+  color: #0f172a;
+}
+
+.firebase-page p.firebase-lead {
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #475569;
+}
+
+.firebase-form {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.firebase-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.firebase-field label {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.firebase-field input,
+.firebase-field select,
+.firebase-field textarea {
+  border: 1px solid #cbd5f5;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.firebase-field input:focus,
+.firebase-field select:focus,
+.firebase-field textarea:focus {
+  border-color: #6366f1;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.firebase-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.firebase-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.9rem 1.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.firebase-btn.primary {
+  background: #4f46e5;
+  color: #fff;
+}
+
+.firebase-btn.secondary {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.firebase-btn.danger {
+  background: #dc2626;
+  color: #fff;
+}
+
+.firebase-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.firebase-toast {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: #ecfccb;
+  color: #166534;
+  font-weight: 600;
+  text-align: center;
+  animation: toastPop 0.4s ease;
+}
+
+.firebase-toast.success {
+  background: #ecfccb;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  box-shadow: 0 10px 30px rgba(22, 101, 52, 0.15);
+}
+
+.firebase-toast.error {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  box-shadow: 0 10px 30px rgba(185, 28, 28, 0.15);
+}
+
+.firebase-error {
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
+.firebase-list {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.firebase-list-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.25rem;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.firebase-list-item h3 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.firebase-meta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+.firebase-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #475569;
+  border: 2px dashed #dbeafe;
+  border-radius: 16px;
+}
+
+.firebase-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.firebase-modal {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 18px;
+  max-width: 420px;
+  width: calc(100% - 2rem);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.2);
+  text-align: center;
+}
+
+.firebase-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.firebase-image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.firebase-image-grid img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.firebase-profile-header {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.firebase-profile-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #6366f1;
+}
+
+.firebase-profile-meta {
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.firebase-profile-meta span {
+  font-family: "JetBrains Mono", Consolas, monospace;
+}
+
+.firebase-divider {
+  border-top: 1px dashed #e2e8f0;
+  margin: 2rem 0;
+}
+
+.firebase-subheading {
+  font-size: 1.25rem;
+  color: #0f172a;
+  margin-bottom: 1rem;
+}
+
+.firebase-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.firebase-profile-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1rem;
+  background: #fdfcff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.firebase-profile-card h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.firebase-profile-description {
+  font-size: 0.9rem;
+  color: #475569;
+  flex-grow: 1;
+}
+
+.firebase-profile-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: #0f172a;
+}
+
+@media (min-width: 640px) {
+  .firebase-profile-meta {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.firebase-profile-page {
+  background: linear-gradient(180deg, #0e0a17 0%, #171228 60%, #130f20 100%);
+  color: #e5e7eb;
+}
+
+.firebase-profile-shell {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.45);
+  max-width: 1100px;
+}
+
+.firebase-profile-shell h1,
+.firebase-profile-shell h2,
+.firebase-profile-shell p {
+  color: #f9fafb;
+}
+
+.firebase-profile-shell .firebase-chip {
+  background: rgba(99, 102, 241, 0.15);
+  color: #c7d2fe;
+}
+
+.firebase-profile-shell .firebase-profile-card {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: rgba(99, 102, 241, 0.25);
+  color: #e5e7eb;
+}
+
+.firebase-profile-shell .firebase-profile-description {
+  color: #cbd5f5;
+}
+
+.firebase-profile-shell .firebase-profile-meta {
+  color: #fef3c7;
+}
+
+.firebase-profile-shell .firebase-empty {
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #cbd5f5;
+}
+
+/* Dark theme styling for all form elements */
+.firebase-profile-shell .firebase-field label {
+  color: #f9fafb;
+}
+
+.firebase-profile-shell .firebase-field input,
+.firebase-profile-shell .firebase-field select,
+.firebase-profile-shell .firebase-field textarea {
+  background: rgba(15, 23, 42, 0.5);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #f9fafb;
+}
+
+.firebase-profile-shell .firebase-field input::placeholder,
+.firebase-profile-shell .firebase-field textarea::placeholder {
+  color: #9ca3af;
+}
+
+.firebase-profile-shell .firebase-field input:focus,
+.firebase-profile-shell .firebase-field select:focus,
+.firebase-profile-shell .firebase-field textarea:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+.firebase-profile-shell .firebase-list-item {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #e5e7eb;
+}
+
+.firebase-profile-shell .firebase-list-item h3 {
+  color: #f9fafb;
+}
+
+.firebase-profile-shell .firebase-meta {
+  color: #cbd5f5;
+}
+
+.firebase-profile-shell .firebase-error {
+  color: #fca5a5;
+}
+
+.firebase-profile-shell .firebase-modal {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f9fafb;
+}
+
+.firebase-profile-shell .firebase-modal h3 {
+  color: #f9fafb;
+}
+
+.firebase-profile-shell .firebase-modal p {
+  color: #cbd5f5;
+}
+
+@keyframes toastPop {
+  0% {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .firebase-card {
+    padding: 1.5rem;
+  }
+
+  .firebase-meta {
+    flex-direction: column;
+  }
+}
+

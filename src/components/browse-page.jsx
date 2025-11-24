@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import styles from "./styles/browse-page.module.css";
@@ -9,6 +9,7 @@ export default function BrowsePage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all"); // "all", "projects", "services"
   const [filterCategory, setFilterCategory] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
 
   // Dummy Projects Data
   const dummyProjects = [
@@ -293,7 +294,7 @@ export default function BrowsePage() {
     fetchData();
   }, []);
 
-  const getDisplayItems = () => {
+  const getDisplayItems = useMemo(() => {
     let items = [];
     if (activeTab === "all") {
       items = [...projects, ...services];
@@ -307,8 +308,17 @@ export default function BrowsePage() {
       items = items.filter((item) => item.category === filterCategory);
     }
 
+    if (searchKeyword.trim()) {
+      const needle = searchKeyword.trim().toLowerCase();
+      items = items.filter((item) => {
+        const title = (item.projectTitle || item.title || "").toLowerCase();
+        const description = (item.description || "").toLowerCase();
+        return title.includes(needle) || description.includes(needle);
+      });
+    }
+
     return items;
-  };
+  }, [activeTab, filterCategory, searchKeyword, projects, services]);
 
   const formatPrice = (item) => {
     if (item.type === "project") {
@@ -334,7 +344,7 @@ export default function BrowsePage() {
     }
   };
 
-  const displayItems = getDisplayItems();
+  const displayItems = getDisplayItems;
 
   return (
     <div className={styles.page}>
@@ -375,6 +385,13 @@ export default function BrowsePage() {
               </option>
             ))}
           </select>
+          <input
+            className={styles.searchInput}
+            type="search"
+            placeholder="Search by keyword"
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+          />
         </div>
 
         {loading ? (
