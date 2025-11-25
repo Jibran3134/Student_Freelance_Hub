@@ -14,12 +14,18 @@ import AdminDashboard from "./components/admin-dashboard";
 import BrowsePage from "./components/browse-page";
 import UpdateProfile from "./components/update-profile";
 import UploadPortfolio from "./components/upload-portfolio";
+<<<<<<< HEAD
 import FirebaseAddPage from "./components/firebase-add-page";
 import FirebaseListingPage from "./components/firebase-listing-page";
 import FirebaseDetailPage from "./components/firebase-detail-page";
 import FirebaseEditPage from "./components/firebase-edit-page";
 import FirebaseDeletePage from "./components/firebase-delete-page";
 import FirebaseProfilePage from "./components/firebase-profile-page";
+=======
+import WalletPage from "./components/wallet/WalletPage";
+import DisputeCenter from "./components/disputes/DisputeCenter";
+import JobDetails from "./components/payments/JobDetails";
+>>>>>>> 19381ed14f42a5b8b9c3e2542c671ed6f02b85e8
 
 function App() {
   const [route, setRoute] = useState(window.location.hash || "#/");
@@ -55,7 +61,7 @@ function App() {
         return <ProfilePage />;
       case "#/users":
         return <UsersPage />;
-        case "#/update-profile":
+      case "#/update-profile":
         return <UpdateProfile />;
       case "#/upload-portfolio":
         return <UploadPortfolio />;
@@ -81,6 +87,12 @@ function App() {
         return <AdminDashboard />;
       case "#/browse":
         return <BrowsePage />;
+      case "#/wallet":
+        return <WalletPage />;
+      case "#/disputes":
+        return <DisputeCenter />;
+      case "#/job-details":
+        return <JobDetails />;
       case "#/":
       default:
         return <LandingPage />;
