@@ -1,0 +1,166 @@
+.dispute-page {
+  min-height: 100vh;
+  padding: 3rem 1.5rem;
+  background: linear-gradient(180deg, #0e0a17 0%, #171228 60%, #130f20 100%);
+  color: #e5e7eb;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.dispute-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.dispute-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 1.75rem;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
+.dispute-card h2,
+.dispute-card h3 {
+  margin-top: 0;
+  color: #f9fafb;
+}
+
+.dispute-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dispute-form label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #d1d5db;
+}
+
+.dispute-input,
+.dispute-textarea,
+.dispute-select {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.2);
+  color: #f9fafb;
+  font-size: 1rem;
+}
+
+.dispute-textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.dispute-input:focus,
+.dispute-textarea:focus,
+.dispute-select:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+}
+
+.dispute-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.primary-btn {
+  padding: 0.85rem 1.4rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+}
+
+.primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.primary-btn:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.55);
+}
+
+.dispute-status {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.dispute-status.success {
+  color: #34d399;
+}
+
+.dispute-status.error {
+  color: #f87171;
+}
+
+.dispute-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dispute-item {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dispute-header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.badge.open {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
+}
+
+.badge.resolved {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+}
+
+.badge.pending {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+}
+
+.dispute-details {
+  margin-top: 0.75rem;
+  color: #d1d5db;
+  line-height: 1.5;
+}
+
+.muted {
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+
