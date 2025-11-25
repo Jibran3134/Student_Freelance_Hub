@@ -16,8 +16,8 @@ export default function Navbar() {
           <a href="#/profile" className="navbar-link">Profile</a>
           <a href="#/users" className="navbar-link">Users</a>
           <a href="#/post" className="navbar-link">Post</a>
-          <a href="#/job-details" className="navbar-link">Job Actions</a>
           <a href="#/wallet" className="navbar-link">Wallet</a>
+          <a href="#/transactions" className="navbar-link">Transactions</a>
           <a href="#/disputes" className="navbar-link">Disputes</a>
           <a href="#/contact" className="navbar-link">Contact Us</a>
           <a href="#/manage" className="navbar-link">Manage</a>

@@ -3,6 +3,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import "../../styles/disputes.css";
 import { auth } from "../../firebase";
 import { getUserDisputes } from "../../backend/disputes";
+import RaiseDispute from "./RaiseDispute";
 
 export default function DisputeCenter() {
   const [user, setUser] = useState(null);
@@ -10,19 +11,24 @@ export default function DisputeCenter() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const loadDisputes = async (uid) => {
+    try {
+      setLoading(true);
+      const data = await getUserDisputes(uid);
+      setDisputes(data);
+      setError("");
+    } catch (err) {
+      setError(err.message || "Failed to load disputes.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        try {
-          setLoading(true);
-          const data = await getUserDisputes(currentUser.uid);
-          setDisputes(data);
-        } catch (err) {
-          setError(err.message || "Failed to load disputes.");
-        } finally {
-          setLoading(false);
-        }
+        loadDisputes(currentUser.uid);
       } else {
         setDisputes([]);
         setLoading(false);
@@ -59,8 +65,7 @@ export default function DisputeCenter() {
       <div className="dispute-page">
         <div className="dispute-content">
           <div className="dispute-card">
-            <h2>Dispute Center</h2>
-            <p>Please log in to view your disputes.</p>
+            <p>Please log in to manage disputes.</p>
           </div>
         </div>
       </div>
@@ -70,54 +75,48 @@ export default function DisputeCenter() {
   return (
     <div className="dispute-page">
       <div className="dispute-content">
-        <div className="dispute-card">
-          <h2>Dispute Center</h2>
-          <p className="muted">
-            Track every dispute you have opened. Admins will review submissions
-            and update their status here.
-          </p>
-        </div>
+        <div className="dispute-grid">
+          <RaiseDispute
+            senderId={user.uid}
+            onSubmitted={() => loadDisputes(user.uid)}
+          />
 
-        <div className="dispute-card">
-          <h3>Your Disputes</h3>
-          {loading && <p className="muted">Loading disputes...</p>}
-          {error && <p className="dispute-status error">{error}</p>}
-          {!loading && disputes.length === 0 && (
-            <p className="muted">
-              You have not raised any disputes yet. If an issue occurs with a
-              job, submit a dispute from the job view.
-            </p>
-          )}
-          {!loading && disputes.length > 0 && (
-            <div className="dispute-list">
-              {disputes.map((dispute) => (
-                <div key={dispute.id} className="dispute-item">
-                  <div className="dispute-header">
-                    <div>
-                      <strong>Job:</strong> {dispute.jobId || "Unknown"}
+          <div className="dispute-card">
+            {loading && <p className="muted">Loading disputes...</p>}
+            {error && <p className="dispute-status error">{error}</p>}
+            {!loading && disputes.length === 0 && (
+              <p className="muted">
+                You have not raised any disputes yet. Submit the form to report
+                an issue.
+              </p>
+            )}
+            {!loading && disputes.length > 0 && (
+              <div className="dispute-list">
+                {disputes.map((dispute) => (
+                  <div key={dispute.id} className="dispute-item">
+                    <div className="dispute-header">
+                      <div>
+                        <strong>Job:</strong> {dispute.jobId || "Unknown"}
+                      </div>
+                      <span className={`badge ${dispute.status || "open"}`}>
+                        {dispute.status || "open"}
+                      </span>
                     </div>
-                    <span className={`badge ${dispute.status || "open"}`}>
-                      {dispute.status || "open"}
-                    </span>
-                  </div>
-                  <p className="muted">
-                    Raised on {formatTimestamp(dispute.createdAt)} • Amount:{" "}
-                    {formatAmount(dispute.amount)}
-                  </p>
-                  <div className="dispute-details">
-                    <p>
-                      <strong>Reason:</strong> {dispute.reason || "N/A"}
-                    </p>
-                    <p>{dispute.explanation || "No explanation provided."}</p>
                     <p className="muted">
-                      Support resolution actions will appear here once an admin
-                      reviews this dispute.
+                      Raised on {formatTimestamp(dispute.createdAt)} • Amount:{" "}
+                      {formatAmount(dispute.amount)}
                     </p>
+                    <div className="dispute-details">
+                      <p>
+                        <strong>Reason:</strong> {dispute.reason || "N/A"}
+                      </p>
+                      <p>{dispute.explanation || "No explanation provided."}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
