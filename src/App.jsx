@@ -17,6 +17,12 @@ import UploadPortfolio from "./components/upload-portfolio";
 import WalletPage from "./components/wallet/WalletPage";
 import DisputeCenter from "./components/disputes/DisputeCenter";
 import TransactionHistory from "./components/transactions/TransactionHistory";
+import FirebaseAddPage from "./components/firebase-add-page";
+import FirebaseListingPage from "./components/firebase-listing-page";
+import FirebaseDetailPage from "./components/firebase-detail-page";
+import FirebaseEditPage from "./components/firebase-edit-page";
+import FirebaseDeletePage from "./components/firebase-delete-page";
+import FirebaseProfilePage from "./components/firebase-profile-page";
 
 
 function App() {
