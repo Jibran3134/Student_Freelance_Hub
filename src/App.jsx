@@ -16,7 +16,7 @@ import UpdateProfile from "./components/update-profile";
 import UploadPortfolio from "./components/upload-portfolio";
 import WalletPage from "./components/wallet/WalletPage";
 import DisputeCenter from "./components/disputes/DisputeCenter";
-import JobDetails from "./components/payments/JobDetails";
+import TransactionHistory from "./components/transactions/TransactionHistory";
 
  function App() {
   const [route, setRoute] = useState(window.location.hash || "#/");
@@ -61,8 +61,8 @@ import JobDetails from "./components/payments/JobDetails";
         return <WalletPage />;
       case "#/disputes":
         return <DisputeCenter />;
-      case "#/job-details":
-        return <JobDetails />;
+      case "#/transactions":
+        return <TransactionHistory />;
       case "#/":
       default:
         return <LandingPage />;

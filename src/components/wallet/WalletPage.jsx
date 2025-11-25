@@ -10,6 +10,8 @@ import {
 import { auth, db } from "../../firebase";
 import { addCredits, getWalletBalance } from "../../backend/wallet";
 import { saveCard, getSavedCards } from "../../backend/cards";
+import WithdrawRequest from "./WithdrawRequest";
+import WithdrawHistory from "./WithdrawHistory";
 import "../../styles/wallet.css";
 
 export default function WalletPage() {
@@ -543,6 +545,14 @@ export default function WalletPage() {
               </div>
             )}
           </div>
+        </div>
+
+        <div className="wallet-grid">
+          <WithdrawRequest
+            userId={user.uid}
+            balance={balance}
+          />
+          <WithdrawHistory userId={user.uid} />
         </div>
 
         <div className="wallet-transactions">

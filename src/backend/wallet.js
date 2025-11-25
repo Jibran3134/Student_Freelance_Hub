@@ -3,12 +3,19 @@ import {
   doc,
   getDoc,
   setDoc,
-  updateDoc,
   increment,
   serverTimestamp,
   collection,
   addDoc,
+  query,
+  where,
+  getDocs,
+  runTransaction,
 } from "firebase/firestore";
+import {
+  ensurePositiveAmount,
+  validateWithdrawalPayload,
+} from "./validators";
 
 const WALLET_COLLECTION = "wallets";
 const TRANSACTIONS_COLLECTION = "transactions";
@@ -36,10 +43,7 @@ export async function getWalletBalance(userId) {
 export async function addCredits(userId, amount) {
   if (!userId) throw new Error("Missing userId");
 
-  const numericAmount = Number(amount);
-  if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
-    throw new Error("Amount must be greater than zero");
-  }
+  const numericAmount = ensurePositiveAmount(amount);
 
   const walletRef = getWalletRef(userId);
   await setDoc(
@@ -71,6 +75,84 @@ export async function createTransaction(type, data) {
     ...data,
   };
   return addDoc(transactionsRef, docData);
+}
+
+export async function getTransactions(userId) {
+  if (!userId) throw new Error("Missing userId");
+  const transactionsRef = collection(db, TRANSACTIONS_COLLECTION);
+  const q = query(
+    transactionsRef,
+    where("participants", "array-contains", userId)
+  );
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs
+    .map((doc) => ({ id: doc.id, ...doc.data() }))
+    .sort((a, b) => {
+      const timeA = a.timestamp?.toMillis
+        ? a.timestamp.toMillis()
+        : a.timestamp?.seconds
+        ? a.timestamp.seconds * 1000
+        : 0;
+      const timeB = b.timestamp?.toMillis
+        ? b.timestamp.toMillis()
+        : b.timestamp?.seconds
+        ? b.timestamp.seconds * 1000
+        : 0;
+      return timeB - timeA;
+    });
+}
+
+export async function requestWithdrawal(userId, amount, method, details) {
+  if (!userId) throw new Error("Missing userId");
+
+  const currentBalance = await getWalletBalance(userId);
+  const numericAmount = validateWithdrawalPayload({
+    amount,
+    balance: currentBalance,
+    method,
+    accountDetails: details,
+  });
+
+  const walletRef = getWalletRef(userId);
+
+  await runTransaction(db, async (transaction) => {
+    const walletSnapshot = await transaction.get(walletRef);
+    const balance = walletSnapshot.exists()
+      ? Number(walletSnapshot.data().balance) || 0
+      : 0;
+
+    if (balance < numericAmount) {
+      throw new Error("Insufficient balance for withdrawal.");
+    }
+
+    transaction.set(
+      walletRef,
+      {
+        userId,
+        balance: balance - numericAmount,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  });
+
+  await createTransaction("withdrawal", {
+    userId,
+    amount: numericAmount,
+    participants: [userId],
+    description: `Withdrawal via ${method}`,
+  });
+
+  const withdrawRef = collection(db, "withdraw_requests");
+  const docData = {
+    userId,
+    amount: numericAmount,
+    method,
+    accountDetails: details,
+    status: "completed",
+    timestamp: serverTimestamp(),
+  };
+  return addDoc(withdrawRef, docData);
 }
 
 
