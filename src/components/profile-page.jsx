@@ -15,7 +15,8 @@ export default function ProfilePage() {
     education: "",
     profilePicture: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
     portfolioItems: [],
-    availability: "online"
+    availability: "online",
+    visibility: "public"
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -61,6 +62,23 @@ export default function ProfilePage() {
 
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
+          const userVisibility = userData.visibility || "public";
+
+          // Check visibility access
+          if (!isOwn) {
+            if (userVisibility === "private") {
+              setError("This profile is private.");
+              setLoading(false);
+              return;
+            }
+
+            if (userVisibility === "students" && !currentUser) {
+              setError("This profile is only visible to logged-in students.");
+              setLoading(false);
+              return;
+            }
+          }
+
           setProfileData((prev) => ({
             ...prev,
             name: userData.name || "Anonymous User",
@@ -68,7 +86,8 @@ export default function ProfilePage() {
             skills: userData.skills || [],
             education: userData.education || "",
             profilePicture: userData.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
-            availability: userData.availability || "online"
+            availability: userData.availability || "online",
+            visibility: userVisibility
           }));
         } else {
           setError("User not found.");
