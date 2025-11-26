@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { db } from "../firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { db, auth } from "../firebase";
+import { collection, getDocs, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 import styles from "./styles/browse-page.module.css";
 
 export default function BrowsePage() {
@@ -10,6 +11,10 @@ export default function BrowsePage() {
   const [activeTab, setActiveTab] = useState("all"); // "all", "projects", "services"
   const [filterCategory, setFilterCategory] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   // Dummy Projects Data
   const dummyProjects = [
@@ -258,6 +263,108 @@ export default function BrowsePage() {
     "Other",
   ];
 
+  // Listen to auth state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Handle bookmark
+  const handleBookmark = async () => {
+    if (!currentUser) {
+      alert("Please login to bookmark items");
+      return;
+    }
+    setActionLoading(true);
+    try {
+      await addDoc(collection(db, "bookmarks"), {
+        userId: currentUser.uid,
+        itemId: selectedItem.id,
+        itemType: selectedItem.type,
+        title: selectedItem.type === "project" ? selectedItem.projectTitle : selectedItem.title,
+        category: selectedItem.category,
+        createdAt: serverTimestamp(),
+      });
+      alert("Bookmarked successfully!");
+      window.location.hash = "#/home";
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error bookmarking:", error);
+      alert("Failed to bookmark. Please try again.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Handle send request
+  const handleSendRequest = async () => {
+    if (!currentUser) {
+      alert("Please login to send requests");
+      return;
+    }
+    setActionLoading(true);
+    try {
+      const projectOwnerId = selectedItem.ownerId || "owner-placeholder";
+      const isFirstService = selectedItem.id === "dummy-serv-1";
+      const requestStatus = isFirstService ? "accepted" : "pending";
+      const deadline = new Date();
+      deadline.setDate(deadline.getDate() + 30);
+
+      const requestRef = await addDoc(collection(db, "requests"), {
+        requesterId: currentUser.uid,
+        requesterName: currentUser.displayName || currentUser.email,
+        projectOwnerId: projectOwnerId,
+        projectId: selectedItem.id,
+        projectTitle: selectedItem.type === "project" ? selectedItem.projectTitle : selectedItem.title,
+        projectType: selectedItem.type,
+        status: requestStatus,
+        createdAt: serverTimestamp(),
+        deadline: deadline.toISOString(),
+      });
+
+      if (!isFirstService) {
+        await addDoc(collection(db, "notifications"), {
+          userId: projectOwnerId,
+          type: "request",
+          title: "New Project Request",
+          message: `${currentUser.displayName || currentUser.email} sent a request for "${selectedItem.type === "project" ? selectedItem.projectTitle : selectedItem.title}"`,
+          projectId: selectedItem.id,
+          requestId: requestRef.id,
+          read: false,
+          timestamp: serverTimestamp(),
+          targetPath: `#/request-approval/${requestRef.id}`,
+        });
+      }
+
+      if (isFirstService) {
+        await addDoc(collection(db, "notifications"), {
+          userId: currentUser.uid,
+          type: "accepted",
+          title: "Request Accepted!",
+          message: `Your request for "${selectedItem.title}" has been automatically accepted!`,
+          projectId: selectedItem.id,
+          requestId: requestRef.id,
+          read: false,
+          timestamp: serverTimestamp(),
+          targetPath: "#/home",
+        });
+        alert("Request sent and automatically accepted! Check your Enrolled Projects on the Home page.");
+      } else {
+        alert("Request sent successfully!");
+        window.location.hash = "#/home";
+      }
+
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error sending request:", error);
+      alert("Failed to send request. Please try again.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -404,11 +511,18 @@ export default function BrowsePage() {
         ) : (
           <div className={styles.grid}>
             {displayItems.map((item) => (
-              <div key={item.id} className={styles.card}>
+              <div
+                key={item.id}
+                className={styles.card}
+                onClick={() => {
+                  setSelectedItem(item);
+                  setShowModal(true);
+                }}
+                style={{ cursor: 'pointer' }}
+              >
                 <div
-                  className={`${styles.badge} ${
-                    item.type === "project" ? styles.badgeProject : styles.badgeService
-                  }`}
+                  className={`${styles.badge} ${item.type === "project" ? styles.badgeProject : styles.badgeService
+                    }`}
                 >
                   {item.type === "project" ? "Project" : "Service"}
                 </div>
@@ -438,6 +552,46 @@ export default function BrowsePage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Modal */}
+        {showModal && selectedItem && (
+          <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
+            <div className={styles.modalDialog} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.modalHeader}>
+                <h2>{selectedItem.type === "project" ? selectedItem.projectTitle : selectedItem.title}</h2>
+                <button className={styles.modalClose} onClick={() => setShowModal(false)}>&times;</button>
+              </div>
+              <div className={styles.modalBody}>
+                <div className={styles.modalBadge}>
+                  {selectedItem.type === "project" ? "Project" : "Service"}
+                </div>
+                {selectedItem.category && <p><strong>Category:</strong> {selectedItem.category}</p>}
+                <p><strong>Description:</strong></p>
+                <p>{selectedItem.description}</p>
+                <p><strong>Price:</strong> {formatPrice(selectedItem)}</p>
+                {selectedItem.type === "project" && selectedItem.deadline && (
+                  <p><strong>Deadline:</strong> {new Date(selectedItem.deadline).toLocaleDateString()}</p>
+                )}
+              </div>
+              <div className={styles.modalFooter}>
+                <button
+                  className={styles.btnBookmark}
+                  onClick={handleBookmark}
+                  disabled={actionLoading}
+                >
+                  {actionLoading ? "Loading..." : "📌 Bookmark"}
+                </button>
+                <button
+                  className={styles.btnRequest}
+                  onClick={handleSendRequest}
+                  disabled={actionLoading}
+                >
+                  {actionLoading ? "Loading..." : "📤 Send Request"}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

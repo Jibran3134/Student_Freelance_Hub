@@ -1,8 +1,40 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { auth, db } from "../firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 import logo from "../logo.png";
 import "./styles/navbar.css";
 
 export default function Navbar() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!currentUser?.uid) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const notifQuery = query(
+      collection(db, "notifications"),
+      where("userId", "==", currentUser.uid),
+      where("read", "==", false)
+    );
+
+    const unsubscribe = onSnapshot(notifQuery, (snapshot) => {
+      setUnreadCount(snapshot.size);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser?.uid]);
+
   return (
     <nav className="navbar">
       <div className="navbar-inner">
@@ -21,6 +53,10 @@ export default function Navbar() {
           <a href="#/disputes" className="navbar-link">Disputes</a>
           <a href="#/contact" className="navbar-link">Contact Us</a>
           <a href="#/manage" className="navbar-link">Manage</a>
+          <a href="#/notifications" className="navbar-link navbar-bell">
+            🔔
+            {unreadCount > 0 && <span className="navbar-badge">{unreadCount}</span>}
+          </a>
         </div>
       </div>
     </nav>

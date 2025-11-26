@@ -23,6 +23,8 @@ import FirebaseDetailPage from "./components/firebase-detail-page";
 import FirebaseEditPage from "./components/firebase-edit-page";
 import FirebaseDeletePage from "./components/firebase-delete-page";
 import FirebaseProfilePage from "./components/firebase-profile-page";
+import NotificationsScreen from "./components/notifications-screen";
+import RequestApproval from "./components/request-approval";
 
 
 function App() {
@@ -52,6 +54,10 @@ function App() {
       return <FirebaseDeletePage itemId={id} />;
     }
 
+    if (route.startsWith("#/request-approval/")) {
+      return <RequestApproval />;
+    }
+
     switch (route) {
       case "#/home":
         return <HomePage />;
@@ -69,6 +75,8 @@ function App() {
         return <FirebaseListingPage />;
       case "#/firebase-profile":
         return <FirebaseProfilePage />;
+      case "#/notifications":
+        return <NotificationsScreen />;
       case "#/post":
         return <PostPage />;
       case "#/post-service":

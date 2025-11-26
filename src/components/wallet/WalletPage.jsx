@@ -20,9 +20,10 @@ export default function WalletPage() {
   const [topUpAmount, setTopUpAmount] = useState("");
   const [status, setStatus] = useState({ type: "", message: "" });
   const [transactions, setTransactions] = useState([]);
+  const [pendingPayments, setPendingPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
-  
+
   // Card form state
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
@@ -38,17 +39,21 @@ export default function WalletPage() {
   useEffect(() => {
     let walletUnsubscribe;
     let transactionUnsubscribe;
+    let paymentsUnsubscribe;
 
     const authUnsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       walletUnsubscribe?.();
       transactionUnsubscribe?.();
+      paymentsUnsubscribe?.();
 
       if (currentUser) {
         const walletBalance = await getWalletBalance(currentUser.uid);
         setBalance(walletBalance);
+        setBalance(walletBalance);
         walletUnsubscribe = subscribeToWallet(currentUser.uid);
         transactionUnsubscribe = subscribeToTransactions(currentUser.uid);
+        paymentsUnsubscribe = subscribeToPayments(currentUser.uid);
         // Load saved cards
         try {
           const cards = await getSavedCards(currentUser.uid);
@@ -72,6 +77,7 @@ export default function WalletPage() {
       authUnsubscribe();
       walletUnsubscribe?.();
       transactionUnsubscribe?.();
+      paymentsUnsubscribe?.();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -104,16 +110,31 @@ export default function WalletPage() {
           const dateA = a.timestamp?.toDate
             ? a.timestamp.toDate().getTime()
             : a.timestamp?.seconds
-            ? a.timestamp.seconds * 1000
-            : 0;
+              ? a.timestamp.seconds * 1000
+              : 0;
           const dateB = b.timestamp?.toDate
             ? b.timestamp.toDate().getTime()
             : b.timestamp?.seconds
-            ? b.timestamp.seconds * 1000
-            : 0;
+              ? b.timestamp.seconds * 1000
+              : 0;
           return dateB - dateA;
         });
       setTransactions(mapped);
+    });
+  };
+
+  const subscribeToPayments = (userId) => {
+    const paymentsQuery = query(
+      collection(db, "requests"),
+      where("requesterId", "==", userId),
+      where("status", "==", "completed")
+    );
+    return onSnapshot(paymentsQuery, (snapshot) => {
+      const payments = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setPendingPayments(payments);
     });
   };
 
@@ -148,7 +169,7 @@ export default function WalletPage() {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth() + 1;
-    
+
     if (month < 1 || month > 12) return "Invalid month";
     if (year < currentYear || (year === currentYear && month < currentMonth)) {
       return "Card has expired";
@@ -239,14 +260,14 @@ export default function WalletPage() {
     try {
       setProcessing(true);
       setShowConfirmation(false);
-      
+
       // Save card if requested and using new card
       if (useNewCard && saveCardForLater) {
         const cardNumberCleaned = cardNumber.replace(/\s/g, "");
         const last4 = cardNumberCleaned.slice(-4);
         const maskedNumber = "**** **** **** " + last4;
         const [expiryMonth, expiryYear] = cardExpiry.split("/");
-        
+
         await saveCard(user.uid, {
           last4,
           expiryMonth,
@@ -263,7 +284,7 @@ export default function WalletPage() {
       // Add credits to wallet
       const updatedBalance = await addCredits(user.uid, topUpAmount);
       setBalance(updatedBalance);
-      
+
       // Reset form
       setTopUpAmount("");
       setCardNumber("");
@@ -272,12 +293,12 @@ export default function WalletPage() {
       setCardholderName("");
       setSaveCardForLater(false);
       setCardErrors({});
-      
+
       setStatus({
         type: "success",
         message: "Credits added successfully!",
       });
-      
+
       // Reload saved cards
       const cards = await getSavedCards(user.uid);
       setSavedCards(cards);
@@ -306,16 +327,16 @@ export default function WalletPage() {
     const date = timestamp.toDate
       ? timestamp.toDate()
       : timestamp.seconds
-      ? new Date(timestamp.seconds * 1000)
-      : null;
+        ? new Date(timestamp.seconds * 1000)
+        : null;
     return date
       ? date.toLocaleString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
       : "Date unavailable";
   };
 
@@ -555,6 +576,35 @@ export default function WalletPage() {
           <WithdrawHistory userId={user.uid} />
         </div>
 
+        {/* Pending Payments Section */}
+        <div className="wallet-transactions" style={{ marginBottom: '2rem' }}>
+          <h3>Pending Payments (Completed Work)</h3>
+          {pendingPayments.length === 0 ? (
+            <div className="empty-state">
+              No pending payments. Turn in work to see pending payments here.
+            </div>
+          ) : (
+            <div className="transaction-list">
+              {pendingPayments.map((payment) => (
+                <div key={payment.id} className="transaction-item">
+                  <div className="transaction-meta">
+                    <span className="transaction-type">Pending Payment</span>
+                    <span className="transaction-description">
+                      {payment.projectTitle} ({payment.projectType})
+                    </span>
+                    <span className="transaction-date">
+                      Turned in: {formatTimestamp(payment.completedAt)}
+                    </span>
+                  </div>
+                  <div className="transaction-amount positive">
+                    Pending Release
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="wallet-transactions">
           <h3>Transaction History</h3>
           {transactions.length === 0 ? (
@@ -579,15 +629,14 @@ export default function WalletPage() {
                     </span>
                   </div>
                   <div
-                    className={`transaction-amount ${
-                      transaction.type === "credit" ||
-                      transaction.receiverId === user.uid
+                    className={`transaction-amount ${transaction.type === "credit" ||
+                        transaction.receiverId === user.uid
                         ? "positive"
                         : "negative"
-                    }`}
+                      }`}
                   >
                     {transaction.type === "credit" ||
-                    transaction.receiverId === user.uid
+                      transaction.receiverId === user.uid
                       ? "+"
                       : "-"}
                     {formatCurrency(transaction.amount)}
