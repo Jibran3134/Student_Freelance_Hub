@@ -58,7 +58,10 @@ function App() {
   const isLanding = route === "#/" || route === "";
 
   const renderPage = () => {
-    switch (route) {
+    // Extract the base route without query parameters
+    const baseRoute = route.split('?')[0];
+
+    switch (baseRoute) {
       case "#/home":
         return <HomePage />;
       case "#/profile":
