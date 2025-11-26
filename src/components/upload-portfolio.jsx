@@ -10,7 +10,9 @@ export default function UploadPortfolio() {
     title: "",
     description: "",
     image: null,
+    image: null,
     imagePreview: null,
+    visibility: "public",
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -80,17 +82,17 @@ export default function UploadPortfolio() {
 
   const validateItem = () => {
     const newErrors = {};
-    
+
     if (!currentItem.title.trim()) {
       newErrors.title = "Title is required";
     }
-    
+
     if (!currentItem.description.trim()) {
       newErrors.description = "Description is required";
     }
-    
+
     // Image is now optional - removed the required validation
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -99,21 +101,24 @@ export default function UploadPortfolio() {
     if (!validateItem()) {
       return;
     }
-    
+
     const newItem = {
       id: Date.now(),
       title: currentItem.title,
       description: currentItem.description,
       image: currentItem.image || null, // Allow null if no image
       imagePreview: currentItem.imagePreview || "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=300&h=200&fit=crop&auto=format", // Default AI-generated image
+      visibility: currentItem.visibility || "public",
     };
-    
+
     setPortfolioItems((prev) => [...prev, newItem]);
     setCurrentItem({
       title: "",
       description: "",
       image: null,
+      image: null,
       imagePreview: null,
+      visibility: "public",
     });
     setErrors({});
     // Reset file input
@@ -135,20 +140,20 @@ export default function UploadPortfolio() {
       window.location.hash = "#/login";
       return;
     }
-    
+
     // Confirmation alert before saving
     const confirmSave = window.confirm(`Are you sure you want to upload ${portfolioItems.length} portfolio item(s)?`);
     if (!confirmSave) {
       return; // User cancelled, don't proceed
     }
-    
+
     setLoading(true);
     setErrors({}); // Clear previous errors
-    
+
     console.log("=== Starting Portfolio Upload ===");
     console.log("Portfolio Items:", portfolioItems);
     console.log("User:", user.uid);
-    
+
     try {
       let uploadedCount = 0;
       // Upload each portfolio item
@@ -157,30 +162,30 @@ export default function UploadPortfolio() {
         console.log(`\nProcessing item ${i + 1}/${portfolioItems.length}:`, item.title);
         console.log("Item image:", item.image);
         console.log("Is File?", item.image instanceof File);
-        
+
         let imageUrl = item.imagePreview || "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=300&h=200&fit=crop&auto=format";
 
         // Upload image to Firebase Storage if it's a file
         if (item.image && item.image instanceof File) {
           const fileToUpload = item.image;
-          
+
           console.log(`Uploading portfolio image ${i + 1}/${portfolioItems.length}:`, {
             name: fileToUpload.name,
             size: fileToUpload.size,
             type: fileToUpload.type
           });
-          
+
           try {
             const timestamp = Date.now();
             const fileName = `${timestamp}_${fileToUpload.name}`;
             const imageRef = ref(storage, `portfolio/${user.uid}/${fileName}`);
-            
+
             console.log("Storage reference created:", imageRef.fullPath);
-            
+
             // Upload the file
             const snapshot = await uploadBytes(imageRef, fileToUpload);
             console.log("Upload successful! Snapshot:", snapshot);
-            
+
             // Get download URL
             imageUrl = await getDownloadURL(snapshot.ref);
             console.log("Image URL obtained:", imageUrl);
@@ -204,11 +209,13 @@ export default function UploadPortfolio() {
           title: item.title,
           description: item.description,
           image: imageUrl,
+          image: imageUrl,
+          visibility: item.visibility || "public",
           createdAt: new Date().toISOString(),
         };
-        
+
         console.log("Portfolio data:", portfolioData);
-        
+
         await addDoc(collection(db, "portfolio"), portfolioData);
         uploadedCount++;
         console.log(`✓ Portfolio item ${uploadedCount} saved successfully`);
@@ -283,6 +290,23 @@ export default function UploadPortfolio() {
                 {errors.description && (
                   <span className={styles.error}>{errors.description}</span>
                 )}
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label className={styles.label} htmlFor="visibility">
+                  Visibility
+                </label>
+                <select
+                  id="visibility"
+                  name="visibility"
+                  value={currentItem.visibility}
+                  onChange={handleInputChange}
+                  className={styles.input} // Reusing input style for consistency
+                  style={{ height: 'auto', padding: '0.75rem' }}
+                >
+                  <option value="public">Public (Everyone)</option>
+                  <option value="private">Private (Only Me)</option>
+                </select>
               </div>
 
               <div className={styles.inputGroup}>
@@ -368,6 +392,17 @@ export default function UploadPortfolio() {
                         </button>
                       </div>
                       <p className={styles.itemDescription}>{item.description}</p>
+                      <span style={{
+                        fontSize: '0.75rem',
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '4px',
+                        backgroundColor: item.visibility === 'public' ? '#d1fae5' : '#fee2e2',
+                        color: item.visibility === 'public' ? '#065f46' : '#991b1b',
+                        marginTop: '0.5rem',
+                        display: 'inline-block'
+                      }}>
+                        {item.visibility === 'public' ? 'Public' : 'Private'}
+                      </span>
                     </div>
                   </div>
                 ))}

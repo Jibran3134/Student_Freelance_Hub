@@ -61,28 +61,6 @@
   border-color: #8B5CF6;
 }
 
-.inputError {
-  border-color: #e53e3e;
-}
-
-.textarea {
-  padding: 0.875rem 1rem;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 12px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  outline: none;
-  font-family: inherit;
-  resize: vertical;
-  min-height: 100px;
-  background: rgba(255,255,255,0.03);
-  color: #E5E7EB;
-}
-
-.textarea:focus {
-  border-color: #8B5CF6;
-}
-
 .textareaError {
   border-color: #e53e3e;
 }

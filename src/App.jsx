@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { auth, db } from "./firebase";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import LandingPage from "./components/landing-page";
 import Navbar from "./components/navbar";
 import HomePage from "./components/home-page";
@@ -18,13 +20,39 @@ import WalletPage from "./components/wallet/WalletPage";
 import DisputeCenter from "./components/disputes/DisputeCenter";
 import TransactionHistory from "./components/transactions/TransactionHistory";
 
- function App() {
+function App() {
   const [route, setRoute] = useState(window.location.hash || "#/");
 
   useEffect(() => {
     const onHashChange = () => setRoute(window.location.hash || "#/");
     window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
+
+    // Self-healing: Check if logged-in user has visibility field
+    const unsubscribeAuth = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        try {
+          const userDocRef = doc(db, "users", user.uid);
+          const userDocSnap = await getDoc(userDocRef);
+
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            if (!userData.visibility) {
+              console.log("Migrating user to public visibility...");
+              await updateDoc(userDocRef, {
+                visibility: "public"
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error checking user visibility:", error);
+        }
+      }
+    });
+
+    return () => {
+      window.removeEventListener("hashchange", onHashChange);
+      unsubscribeAuth();
+    };
   }, []);
 
   const isLanding = route === "#/" || route === "";

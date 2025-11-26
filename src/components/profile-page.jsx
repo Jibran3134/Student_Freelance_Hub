@@ -15,43 +15,71 @@ export default function ProfilePage() {
     education: "",
     profilePicture: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
     portfolioItems: [],
+    availability: "online"
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
 
   useEffect(() => {
-    const fetchUserData = async (currentUser) => {
-      if (!currentUser) {
-        setLoading(false);
-        return;
+    const fetchUserData = async () => {
+      setLoading(true);
+      setError(null);
+
+      // Parse UID from URL hash (e.g., #/profile?uid=xyz)
+      const hash = window.location.hash;
+      const queryIndex = hash.indexOf("?");
+      let targetUid = null;
+
+      if (queryIndex !== -1) {
+        const params = new URLSearchParams(hash.substring(queryIndex));
+        targetUid = params.get("uid");
       }
+
+      const currentUser = auth.currentUser;
+
+      // If no UID in URL, use current user
+      if (!targetUid) {
+        if (currentUser) {
+          targetUid = currentUser.uid;
+        } else {
+          // Not logged in and no target UID -> Login
+          window.location.hash = "#/login";
+          return;
+        }
+      }
+
+      // Determine if viewing own profile
+      const isOwn = currentUser && currentUser.uid === targetUid;
+      setIsOwnProfile(isOwn);
+      setUser(currentUser);
 
       try {
         // Fetch user profile from Firestore
-        const userDocRef = doc(db, "users", currentUser.uid);
+        const userDocRef = doc(db, "users", targetUid);
         const userDocSnap = await getDoc(userDocRef);
 
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
           setProfileData((prev) => ({
             ...prev,
-            name: userData.name || "",
-            email: currentUser.email || userData.email || "",
+            name: userData.name || "Anonymous User",
+            email: userData.email || "",
             skills: userData.skills || [],
             education: userData.education || "",
             profilePicture: userData.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
+            availability: userData.availability || "online"
           }));
         } else {
-          // If profile doesn't exist, use email from auth
-          setProfileData((prev) => ({
-            ...prev,
-            email: currentUser.email || "",
-          }));
+          setError("User not found.");
+          setLoading(false);
+          return;
         }
 
-        // Fetch portfolio items from Firestore
+        // Fetch portfolio items
         const portfolioQuery = query(
           collection(db, "portfolio"),
-          where("userId", "==", currentUser.uid)
+          where("userId", "==", targetUid)
         );
         const portfolioSnapshot = await getDocs(portfolioQuery);
         const portfolioItems = portfolioSnapshot.docs.map((doc) => ({
@@ -63,32 +91,25 @@ export default function ProfilePage() {
           ...prev,
           portfolioItems: portfolioItems,
         }));
-      } catch (error) {
-        console.error("Error fetching user data:", error);
+
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+        if (err.code === 'permission-denied') {
+          setError("This profile is private or restricted.");
+        } else {
+          setError("Failed to load profile.");
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        fetchUserData(currentUser);
-      } else {
-        setLoading(false);
-        // Redirect to login if not authenticated
-        window.location.hash = "#/login";
-      }
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      fetchUserData();
     });
 
-    // Also fetch data when component mounts or route changes
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-      fetchUserData(currentUser);
-    }
-
     return () => unsubscribe();
-  }, []); // Re-fetch when component mounts
+  }, []);
 
   if (loading) {
     return (
@@ -99,6 +120,46 @@ export default function ProfilePage() {
       </div>
     );
   }
+
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <div className={styles.card} style={{ textAlign: 'center', padding: '3rem' }}>
+            <h2 className={styles.cardTitle}>{error}</h2>
+            <p style={{ color: '#9ca3af' }}>You may not have permission to view this profile.</p>
+            <button
+              className={`${styles.button} ${styles.primaryButton}`}
+              style={{ marginTop: '1rem', maxWidth: '200px', marginInline: 'auto' }}
+              onClick={() => window.location.hash = "#/home"}
+            >
+              Go Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const getAvailabilityColor = (status) => {
+    switch (status) {
+      case "online": return "#10b981";
+      case "busy": return "#ef4444";
+      case "dnd": return "#f59e0b";
+      case "offline": return "#6b7280";
+      default: return "#10b981";
+    }
+  };
+
+  const getAvailabilityLabel = (status) => {
+    switch (status) {
+      case "online": return "Online";
+      case "busy": return "Busy";
+      case "dnd": return "Do Not Disturb";
+      case "offline": return "Offline";
+      default: return "Online";
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -111,31 +172,47 @@ export default function ProfilePage() {
             className={styles.profilePicture}
           />
           <h1 className={styles.name}>{profileData.name}</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <span style={{
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              backgroundColor: getAvailabilityColor(profileData.availability || 'online'),
+              display: 'inline-block'
+            }}></span>
+            <span style={{ color: '#9ca3af', fontSize: '0.9rem' }}>
+              {getAvailabilityLabel(profileData.availability || 'online')}
+            </span>
+          </div>
           <p className={styles.email}>{profileData.email}</p>
           {user && (
             <div style={{ marginBottom: "1.5rem" }}>
-              <AverageRating studentId={user.uid} size="large" />
+              <AverageRating studentId={user ? user.uid : ""} size="large" />
             </div>
           )}
           <div className={styles.actionButtons}>
-            <button
-              className={`${styles.button} ${styles.primaryButton}`}
-              onClick={() => (window.location.hash = "#/update-profile")}
-            >
-              <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-              Edit Profile
-            </button>
-            <button
-              className={`${styles.button} ${styles.secondaryButton}`}
-              onClick={() => (window.location.hash = "#/upload-portfolio")}
-            >
-              <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-              Upload Portfolio
-            </button>
+            {isOwnProfile && (
+              <>
+                <button
+                  className={`${styles.button} ${styles.primaryButton}`}
+                  onClick={() => (window.location.hash = "#/update-profile")}
+                >
+                  <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Edit Profile
+                </button>
+                <button
+                  className={`${styles.button} ${styles.secondaryButton}`}
+                  onClick={() => (window.location.hash = "#/upload-portfolio")}
+                >
+                  <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  Upload Portfolio
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -187,15 +264,33 @@ export default function ProfilePage() {
                   key={item.id}
                   className={styles.portfolioItem}
                 >
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className={styles.portfolioImage}
-                  />
-                  <div className={styles.portfolioContent}>
-                    <h3 className={styles.portfolioTitle}>{item.title}</h3>
-                    <p className={styles.portfolioDescription}>{item.description}</p>
-                  </div>
+                  {item.visibility === 'private' && !isOwnProfile ? (
+                    <div className={styles.lockedItem}>
+                      <div className={styles.lockedIcon}>
+                        <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                      </div>
+                      <p>Private Project</p>
+                    </div>
+                  ) : (
+                    <>
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className={styles.portfolioImage}
+                      />
+                      <div className={styles.portfolioContent}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                          <h3 className={styles.portfolioTitle}>{item.title}</h3>
+                          {item.visibility === 'private' && (
+                            <span style={{ fontSize: '0.7rem', background: '#fee2e2', color: '#991b1b', padding: '2px 6px', borderRadius: '4px' }}>Private</span>
+                          )}
+                        </div>
+                        <p className={styles.portfolioDescription}>{item.description}</p>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
             </div>

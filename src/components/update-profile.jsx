@@ -6,15 +6,17 @@ import styles from "./styles/update-profile.module.css";
 
 export default function UpdateProfile() {
   const [formData, setFormData] = useState({
-    name: "John Doe",
-    skills: ["React", "Node.js", "UI/UX Design", "JavaScript"],
-    education: "Bachelor of Science in Computer Science - University of Technology",
+    name: "",
+    skills: [],
+    education: "",
     profilePicture: null,
     profilePicturePreview: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
+    visibility: "public",
+    availability: "online"
   });
   const [skillInput, setSkillInput] = useState("");
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfileData = async (user) => {
@@ -35,10 +37,14 @@ export default function UpdateProfile() {
             skills: userData.skills || [],
             education: userData.education || "",
             profilePicturePreview: userData.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
+            visibility: userData.visibility || "public",
+            availability: userData.availability || "online"
           }));
         }
       } catch (error) {
         console.error("Error fetching profile data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -83,7 +89,6 @@ export default function UpdateProfile() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      console.log("File selected:", file.name, "Size:", file.size, "Type:", file.type);
       if (file.size > 5 * 1024 * 1024) {
         setErrors((prev) => ({
           ...prev,
@@ -100,57 +105,44 @@ export default function UpdateProfile() {
       }
       const reader = new FileReader();
       reader.onloadend = () => {
-        console.log("File read successfully, setting preview");
         setFormData((prev) => ({
           ...prev,
           profilePicture: file,
           profilePicturePreview: reader.result,
         }));
       };
-      reader.onerror = () => {
-        console.error("Error reading file");
-        setErrors((prev) => ({
-          ...prev,
-          profilePicture: "Error reading image file",
-        }));
-      };
       reader.readAsDataURL(file);
       if (errors.profilePicture) {
         setErrors((prev) => ({ ...prev, profilePicture: "" }));
       }
-    } else {
-      console.log("No file selected");
     }
   };
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
     }
-    
+
     if (formData.skills.length === 0) {
       newErrors.skills = "At least one skill is required";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
-    // Confirmation alert before saving
+
     const confirmSave = window.confirm("Are you sure you want to save these changes?");
-    if (!confirmSave) {
-      return; // User cancelled, don't proceed
-    }
-    
+    if (!confirmSave) return;
+
     const user = auth.currentUser;
     if (!user) {
       window.location.hash = "#/login";
@@ -158,85 +150,48 @@ export default function UpdateProfile() {
     }
 
     setLoading(true);
-    setErrors({}); // Clear previous errors
-    
-    console.log("=== Starting Profile Save ===");
-    console.log("Form Data:", formData);
-    console.log("Profile Picture File:", formData.profilePicture);
-    console.log("Is File?", formData.profilePicture instanceof File);
-    console.log("File Type:", typeof formData.profilePicture);
-    
+    setErrors({});
+
     try {
       let profilePictureUrl = formData.profilePicturePreview;
 
-      // Upload profile picture to Firebase Storage if a new one was selected
       if (formData.profilePicture) {
-        // Check if it's a File object or if we need to handle it differently
-        const fileToUpload = formData.profilePicture instanceof File 
-          ? formData.profilePicture 
+        const fileToUpload = formData.profilePicture instanceof File
+          ? formData.profilePicture
           : null;
-        
+
         if (fileToUpload) {
-          console.log("Uploading profile picture...", {
-            name: fileToUpload.name,
-            size: fileToUpload.size,
-            type: fileToUpload.type
-          });
-          
-          try {
-            const timestamp = Date.now();
-            const fileName = `${timestamp}_${fileToUpload.name}`;
-            const imageRef = ref(storage, `profile-pictures/${user.uid}/${fileName}`);
-            
-            console.log("Storage reference created:", imageRef.fullPath);
-            
-            // Upload the file
-            const snapshot = await uploadBytes(imageRef, fileToUpload);
-            console.log("Upload successful! Snapshot:", snapshot);
-            
-            // Get download URL
-            profilePictureUrl = await getDownloadURL(snapshot.ref);
-            console.log("Profile picture URL obtained:", profilePictureUrl);
-          } catch (uploadError) {
-            console.error("Error during image upload:", uploadError);
-            throw new Error(`Failed to upload image: ${uploadError.message}`);
-          }
-        } else {
-          console.log("No file to upload, using existing preview URL");
+          const timestamp = Date.now();
+          const fileName = `${timestamp}_${fileToUpload.name}`;
+          const imageRef = ref(storage, `profile-pictures/${user.uid}/${fileName}`);
+
+          const snapshot = await uploadBytes(imageRef, fileToUpload);
+          profilePictureUrl = await getDownloadURL(snapshot.ref);
         }
-      } else {
-        console.log("No profile picture selected, keeping existing URL");
       }
 
-      // Update user profile in Firestore
-      console.log("Updating Firestore profile with URL:", profilePictureUrl);
       const userDocRef = doc(db, "users", user.uid);
-      
+
       const updateData = {
         name: formData.name,
         skills: formData.skills,
         education: formData.education,
         profilePicture: profilePictureUrl,
+        visibility: formData.visibility,
+        availability: formData.availability,
         updatedAt: new Date().toISOString(),
       };
-      
-      console.log("Update data:", updateData);
-      
-      await updateDoc(userDocRef, updateData);
-      console.log("Profile updated successfully in Firestore!");
 
-      // Show success message briefly, then redirect
+      await updateDoc(userDocRef, updateData);
+
       alert("Profile updated successfully!");
-      // Force a page reload to refresh the profile data
       window.location.hash = "#/profile";
       setTimeout(() => window.location.reload(), 500);
     } catch (error) {
-      console.error("=== Error saving profile ===", error);
-      console.error("Error code:", error.code);
-      console.error("Error message:", error.message);
-      const errorMessage = error.message || "Failed to save profile. Please try again.";
+      console.error("Error saving profile:", error);
+      const errorMessage = error.message || "Failed to save profile.";
       setErrors({ submit: errorMessage });
-      alert(`Error: ${errorMessage}\n\nCheck the browser console for more details.`);
+      alert(`Error: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -245,6 +200,16 @@ export default function UpdateProfile() {
   const handleCancel = () => {
     window.location.hash = "#/profile";
   };
+
+  if (loading && !formData.name) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <p style={{ textAlign: 'center', color: '#fff' }}>Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={styles.container}>
@@ -313,6 +278,43 @@ export default function UpdateProfile() {
                 className={`${styles.input} ${errors.name ? styles.inputError : ""}`}
               />
               {errors.name && <span className={styles.error}>{errors.name}</span>}
+            </div>
+
+            {/* Visibility Field */}
+            <div className={styles.inputGroup}>
+              <label className={styles.label} htmlFor="visibility">
+                Profile Visibility
+              </label>
+              <select
+                id="visibility"
+                name="visibility"
+                value={formData.visibility}
+                onChange={handleChange}
+                className={styles.select}
+              >
+                <option value="public">Public (Everyone)</option>
+                <option value="students">Students Only (Logged In)</option>
+                <option value="private">Private (Only Me)</option>
+              </select>
+            </div>
+
+            {/* Availability Field */}
+            <div className={styles.inputGroup}>
+              <label className={styles.label} htmlFor="availability">
+                Availability Status
+              </label>
+              <select
+                id="availability"
+                name="availability"
+                value={formData.availability}
+                onChange={handleChange}
+                className={styles.select}
+              >
+                <option value="online">Online</option>
+                <option value="busy">Busy</option>
+                <option value="dnd">Do Not Disturb</option>
+                <option value="offline">Offline</option>
+              </select>
             </div>
 
             {/* Skills Field */}
@@ -395,4 +397,3 @@ export default function UpdateProfile() {
     </div>
   );
 }
-
