@@ -21,6 +21,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const [targetUserId, setTargetUserId] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -54,6 +55,7 @@ export default function ProfilePage() {
       const isOwn = currentUser && currentUser.uid === targetUid;
       setIsOwnProfile(isOwn);
       setUser(currentUser);
+      setTargetUserId(targetUid);
 
       try {
         // Fetch user profile from Firestore
@@ -204,9 +206,9 @@ export default function ProfilePage() {
             </span>
           </div>
           <p className={styles.email}>{profileData.email}</p>
-          {user && (
+          {targetUserId && (
             <div style={{ marginBottom: "1.5rem" }}>
-              <AverageRating studentId={user ? user.uid : ""} size="large" />
+              <AverageRating studentId={targetUserId} size="large" />
             </div>
           )}
           <div className={styles.actionButtons}>
@@ -321,16 +323,16 @@ export default function ProfilePage() {
         </div>
 
         {/* Reviews Section */}
-        {user && (
+        {targetUserId && (
           <div style={{ marginTop: "2rem" }}>
-            <StudentReviews studentId={user.uid} />
+            <StudentReviews studentId={targetUserId} />
           </div>
         )}
 
         {/* Payments Table Section */}
-        {user && (
+        {targetUserId && (
           <div style={{ marginTop: "2rem" }}>
-            <PaymentsTable studentId={user.uid} />
+            <PaymentsTable studentId={targetUserId} />
           </div>
         )}
       </div>
