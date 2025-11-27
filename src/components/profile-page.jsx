@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
-import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, deleteDoc } from "firebase/firestore";
+import { deleteUser, signOut } from "firebase/auth";
+import { updateDoc } from "firebase/firestore";
 import styles from "./styles/profile-page.module.css";
 import AverageRating from "./AverageRating";
 import StudentReviews from "./StudentReviews";
 import PaymentsTable from "./PaymentsTable";
+
+const ADMIN_EMAILS = [
+  "alishba11@gmail.com",
+  "jibran22@gmail.com",
+  "umar33@gmail.com",
+  "abdullah44@gmail.com"
+];
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
@@ -19,38 +28,10 @@ export default function ProfilePage() {
     visibility: "public"
   });
   const [loading, setLoading] = useState(true);
-  const [userListings, setUserListings] = useState([]);
   const [error, setError] = useState(null);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [targetUserId, setTargetUserId] = useState(null);
-
-  const loadListingsByEmail = async (email) => {
-    const normalizedEmail = (email || "").trim().toLowerCase();
-    if (!normalizedEmail) {
-      setUserListings([]);
-      return;
-    }
-    try {
-      const listingsQuery = query(
-        collection(db, "projectsServices"),
-        where("ownerEmail", "==", normalizedEmail)
-      );
-      const listingsSnapshot = await getDocs(listingsQuery);
-      const listingsData = listingsSnapshot.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...docSnap.data(),
-      }));
-      listingsData.sort((a, b) => {
-        const aTime = a.createdAt?.seconds || 0;
-        const bTime = b.createdAt?.seconds || 0;
-        return bTime - aTime;
-      });
-      setUserListings(listingsData);
-    } catch (err) {
-      console.error("Error fetching listings:", err);
-      setUserListings([]);
-    }
-  };
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -80,93 +61,164 @@ export default function ProfilePage() {
         }
       }
 
-      // Determine if viewing own profile
-      const isOwn = currentUser && currentUser.uid === targetUid;
-      setIsOwnProfile(isOwn);
-      setUser(currentUser);
       setTargetUserId(targetUid);
+      setIsOwnProfile(currentUser && currentUser.uid === targetUid);
+      setIsAdmin(currentUser && ADMIN_EMAILS.includes(currentUser.email));
 
       try {
-        // Fetch user profile from Firestore
+        // Fetch User Data
         const userDocRef = doc(db, "users", targetUid);
         const userDocSnap = await getDoc(userDocRef);
 
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
-          const userVisibility = userData.visibility || "public";
 
-          // Check visibility access
-          if (!isOwn) {
-            if (userVisibility === "private") {
-              setError("This profile is private.");
-              setLoading(false);
-              return;
-            }
-
-            if (userVisibility === "students" && !currentUser) {
-              setError("This profile is only visible to logged-in students.");
-              setLoading(false);
-              return;
-            }
-          }
-
-          const derivedEmail = userData.email || (isOwn ? currentUser.email : "") || "";
-
-          setProfileData((prev) => ({
-            ...prev,
-            name: userData.name || "Anonymous User",
-            email: derivedEmail,
-            skills: userData.skills || [],
-            education: userData.education || "",
-            profilePicture: userData.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
-            availability: userData.availability || "online",
-            visibility: userVisibility
+          // Fetch Portfolio Items
+          const portfolioQuery = query(
+            collection(db, "portfolio"),
+            where("userId", "==", targetUid)
+          );
+          const portfolioSnapshot = await getDocs(portfolioQuery);
+          const portfolioItems = portfolioSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
           }));
 
-          // Load listings if we have an email
-          if (derivedEmail) {
-            await loadListingsByEmail(derivedEmail);
-          }
+          setProfileData({
+            ...userData,
+            portfolioItems: portfolioItems,
+            profilePicture: userData.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format"
+          });
+        } else if (isAdmin && isOwnProfile) {
+          // If admin doesn't have a profile doc, just show default view
+          // This allows admins to use the site without creating a student profile
+          setProfileData({
+            name: "Admin User",
+            email: currentUser.email,
+            skills: [],
+            education: "",
+            profilePicture: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
+            portfolioItems: [],
+            availability: "online",
+            visibility: "public"
+          });
         } else {
-          setError("User not found.");
-          setLoading(false);
-          return;
+          setError("User not found");
         }
-
-        // Fetch portfolio items
-        const portfolioQuery = query(
-          collection(db, "portfolio"),
-          where("userId", "==", targetUid)
-        );
-        const portfolioSnapshot = await getDocs(portfolioQuery);
-        const portfolioItems = portfolioSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        setProfileData((prev) => ({
-          ...prev,
-          portfolioItems: portfolioItems,
-        }));
-
       } catch (err) {
-        console.error("Error fetching user data:", err);
-        if (err.code === 'permission-denied') {
-          setError("This profile is private or restricted.");
-        } else {
-          setError("Failed to load profile.");
-        }
+        console.error("Error fetching profile:", err);
+        setError("Failed to load profile data");
       } finally {
         setLoading(false);
       }
     };
 
     const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
       fetchUserData();
     });
 
     return () => unsubscribe();
   }, []);
+
+  const handleDeletePortfolioItem = async (itemId) => {
+    if (!window.confirm("Are you sure you want to delete this portfolio item?")) {
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, "portfolio", itemId));
+      setProfileData(prev => ({
+        ...prev,
+        portfolioItems: prev.portfolioItems.filter(item => item.id !== itemId)
+      }));
+      alert("Portfolio item deleted successfully");
+    } catch (err) {
+      console.error("Error deleting item:", err);
+      alert("Failed to delete item");
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      window.location.hash = "#/login";
+    } catch (error) {
+      console.error("Error signing out:", error);
+      alert("Failed to log out");
+    }
+  };
+
+  const handleDeleteProfile = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // Check if user signed in recently (within last 5 minutes)
+    // This is to ensure deleteUser() doesn't fail with 'auth/requires-recent-login'
+    // after we've already deleted the Firestore data.
+    const lastSignInTime = new Date(user.metadata.lastSignInTime).getTime();
+    const currentTime = Date.now();
+    const fiveMinutes = 5 * 60 * 1000;
+
+    if (currentTime - lastSignInTime > fiveMinutes) {
+      alert("For security reasons, you must have recently signed in to delete your account. Please Logout and Login again, then try deleting immediately.");
+      return;
+    }
+
+    if (!window.confirm("Are you sure you want to delete your profile? This action cannot be undone and will remove all your data.")) {
+      return;
+    }
+
+    try {
+      // Delete User Data from Firestore
+      await deleteDoc(doc(db, "users", user.uid));
+
+      // Delete Portfolio Items
+      const portfolioQuery = query(
+        collection(db, "portfolio"),
+        where("userId", "==", user.uid)
+      );
+      const portfolioSnapshot = await getDocs(portfolioQuery);
+      const deletePromises = portfolioSnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
+
+      // Delete User Auth
+      await deleteUser(user);
+
+      alert("Profile deleted successfully.");
+      window.location.hash = "#/";
+    } catch (err) {
+      console.error("Error deleting profile:", err);
+      if (err.code === 'auth/requires-recent-login') {
+        alert("For security reasons, please log out and log in again to delete your account.");
+      } else {
+        alert("Failed to delete profile: " + err.message);
+      }
+    }
+  };
+
+  const handleAdminDeleteUser = async () => {
+    if (!window.confirm("ADMIN ACTION: Are you sure you want to delete this user? They will be blocked from logging in.")) {
+      return;
+    }
+
+    try {
+      // Mark user as deletedByAdmin in Firestore
+      // We don't delete the doc immediately so we can show the specific message on login
+      await updateDoc(doc(db, "users", targetUserId), {
+        deletedByAdmin: true
+      });
+
+      // Optionally delete their portfolio items or other data here if needed
+      // For now, we just mark them as deleted so they can't login
+
+      alert("User has been deleted by admin.");
+      window.location.hash = "#/users"; // Redirect to users list or home
+    } catch (err) {
+      console.error("Error deleting user:", err);
+      alert("Failed to delete user: " + err.message);
+    }
+  };
 
   if (loading) {
     return (
@@ -182,41 +234,37 @@ export default function ProfilePage() {
     return (
       <div className={styles.container}>
         <div className={styles.content}>
-          <div className={styles.card} style={{ textAlign: 'center', padding: '3rem' }}>
-            <h2 className={styles.cardTitle}>{error}</h2>
-            <p style={{ color: '#9ca3af' }}>You may not have permission to view this profile.</p>
-            <button
-              className={`${styles.button} ${styles.primaryButton}`}
-              style={{ marginTop: '1rem', maxWidth: '200px', marginInline: 'auto' }}
-              onClick={() => window.location.hash = "#/home"}
-            >
-              Go Home
-            </button>
-          </div>
+          <div className={styles.emptyState}>{error}</div>
         </div>
       </div>
     );
   }
 
-  const getAvailabilityColor = (status) => {
-    switch (status) {
-      case "online": return "#10b981";
-      case "busy": return "#ef4444";
-      case "dnd": return "#f59e0b";
-      case "offline": return "#6b7280";
-      default: return "#10b981";
-    }
-  };
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <div className={styles.emptyState}>{error}</div>
+        </div>
+      </div>
+    );
+  }
 
-  const getAvailabilityLabel = (status) => {
-    switch (status) {
-      case "online": return "Online";
-      case "busy": return "Busy";
-      case "dnd": return "Do Not Disturb";
-      case "offline": return "Offline";
-      default: return "Online";
-    }
-  };
+  // Privacy Check
+  if (!isOwnProfile && !isAdmin && profileData.visibility === 'private') {
+    return (
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <div className={styles.header}>
+            <div className={styles.emptyState}>
+              <h2 className={styles.title}>Private Profile</h2>
+              <p>This user's profile is set to private.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -225,195 +273,139 @@ export default function ProfilePage() {
         <div className={styles.header}>
           <img
             src={profileData.profilePicture}
-            alt="Profile"
+            alt={profileData.name}
             className={styles.profilePicture}
           />
-          <h1 className={styles.name}>{profileData.name}</h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+          <h1 className={styles.name}>{profileData.name || "Anonymous"}</h1>
+          <p className={styles.email}>{profileData.email}</p>
+
+          {/* Availability Badge */}
+          <div style={{ marginBottom: '1rem' }}>
             <span style={{
-              width: '10px',
-              height: '10px',
-              borderRadius: '50%',
-              backgroundColor: getAvailabilityColor(profileData.availability || 'online'),
-              display: 'inline-block'
-            }}></span>
-            <span style={{ color: '#9ca3af', fontSize: '0.9rem' }}>
-              {getAvailabilityLabel(profileData.availability || 'online')}
+              padding: '0.25rem 0.75rem',
+              borderRadius: '9999px',
+              backgroundColor: profileData.availability === 'online' ? '#10b981' : '#ef4444',
+              color: 'white',
+              fontSize: '0.875rem'
+            }}>
+              {profileData.availability === 'online' ? 'Online' : 'Busy'}
             </span>
           </div>
-          <p className={styles.email}>{profileData.email}</p>
-          {targetUserId && (
-            <div style={{ marginBottom: "1.5rem" }}>
-              <AverageRating studentId={targetUserId} size="large" />
-            </div>
-          )}
+
           <div className={styles.actionButtons}>
-            {isOwnProfile && (
+            {isOwnProfile || isAdmin ? (
               <>
                 <button
                   className={`${styles.button} ${styles.primaryButton}`}
-                  onClick={() => (window.location.hash = "#/update-profile")}
+                  onClick={() => window.location.hash = `#/update-profile${!isOwnProfile ? `?uid=${targetUserId}` : ''}`}
                 >
-                  <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
                   Edit Profile
                 </button>
-                <button
-                  className={`${styles.button} ${styles.secondaryButton}`}
-                  onClick={() => (window.location.hash = "#/upload-portfolio")}
-                >
-                  <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                  Upload Portfolio
-                </button>
+                {isOwnProfile && (
+                  <button
+                    className={`${styles.button} ${styles.secondaryButton}`}
+                    onClick={() => window.location.hash = "#/upload-portfolio"}
+                  >
+                    Add Portfolio
+                  </button>
+                )}
+                {isOwnProfile && (
+                  <button
+                    className={`${styles.button} ${styles.secondaryButton}`}
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </button>
+                )}
+                {(isOwnProfile || isAdmin) && (
+                  <button
+                    className={`${styles.button}`}
+                    style={{ backgroundColor: '#ef4444', color: 'white', border: 'none' }}
+                    onClick={isOwnProfile ? handleDeleteProfile : handleAdminDeleteUser}
+                  >
+                    {isOwnProfile ? "Delete Profile" : "Delete User (Admin)"}
+                  </button>
+                )}
               </>
+            ) : (
+              <button className={`${styles.button} ${styles.primaryButton}`}>
+                Contact Me
+              </button>
             )}
           </div>
         </div>
 
         {/* Main Content Grid */}
         <div className={styles.mainContent}>
-          {/* Skills Card */}
-          <div className={styles.card}>
-            <h2 className={styles.cardTitle}>
-              <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              Skills
-            </h2>
-            <div className={styles.skillsList}>
-              {profileData.skills.map((skill, index) => (
-                <span key={index} className={styles.skillTag}>
-                  {skill}
-                </span>
-              ))}
+          {/* Left Column: Skills & Education */}
+          <div>
+            <div className={styles.card}>
+              <h2 className={styles.cardTitle}>Skills</h2>
+              <div className={styles.skillsList}>
+                {profileData.skills && profileData.skills.length > 0 ? (
+                  profileData.skills.map((skill, index) => (
+                    <span key={index} className={styles.skillTag}>{skill}</span>
+                  ))
+                ) : (
+                  <p style={{ color: '#9CA3AF' }}>No skills listed</p>
+                )}
+              </div>
             </div>
+
+            <div className={`${styles.card} ${styles.sectionMargin}`}>
+              <h2 className={styles.cardTitle}>Education</h2>
+              <p className={styles.educationText}>
+                {profileData.education || "No education details added"}
+              </p>
+            </div>
+
+            {/* Rating Section */}
+            {targetUserId && (
+              <div className={`${styles.card} ${styles.sectionMargin}`}>
+                <h2 className={styles.cardTitle}>Rating</h2>
+                <AverageRating studentId={targetUserId} />
+              </div>
+            )}
           </div>
 
-          {/* Education Card */}
+          {/* Right Column: Portfolio */}
           <div className={styles.card}>
-            <h2 className={styles.cardTitle}>
-              <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14v9M4 9v9a2 2 0 002 2h12a2 2 0 002-2V9" />
-              </svg>
-              Education
-            </h2>
-            <p className={styles.educationText}>{profileData.education}</p>
-          </div>
-        </div>
-
-        {/* Portfolio Section */}
-        <div className={styles.card} style={{ marginTop: "2rem" }}>
-          <h2 className={styles.cardTitle}>
-            <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
-            Portfolio
-          </h2>
-          {profileData.portfolioItems.length > 0 ? (
-            <div className={styles.portfolioGrid}>
-              {profileData.portfolioItems.map((item) => (
-                <div
-                  key={item.id}
-                  className={styles.portfolioItem}
-                >
-                  {item.visibility === 'private' && !isOwnProfile ? (
-                    <div className={styles.lockedItem}>
-                      <div className={styles.lockedIcon}>
-                        <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                      </div>
-                      <p>Private Project</p>
-                    </div>
-                  ) : (
-                    <>
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className={styles.portfolioImage}
-                      />
-                      <div className={styles.portfolioContent}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                          <h3 className={styles.portfolioTitle}>{item.title}</h3>
-                          {item.visibility === 'private' && (
-                            <span style={{ fontSize: '0.7rem', background: '#fee2e2', color: '#991b1b', padding: '2px 6px', borderRadius: '4px' }}>Private</span>
-                          )}
-                        </div>
-                        <p className={styles.portfolioDescription}>{item.description}</p>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className={styles.emptyState}>
-              <p>No portfolio items yet. Upload your first project!</p>
-            </div>
-          )}
-        </div>
-
-        {/* My Listings Section */}
-        {user && (
-          <div className={styles.card} style={{ marginTop: "2rem" }}>
-            <h2 className={styles.cardTitle}>
-              <svg className={styles.icon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4m-9 4v6"
-                />
-              </svg>
-              Your Projects & Services
-            </h2>
-            {userListings.length ? (
-              <div className={styles.listingsGrid}>
-                {userListings.map((item) => (
-                  <div key={item.id} className={styles.listingCard}>
-                    <div>
-                      <p className={styles.listingCategory}>
-                        {item.category || "Uncategorized"}
-                      </p>
-                      <h3 className={styles.listingTitle}>{item.title}</h3>
-                      <p className={styles.listingPrice}>
-                        {item.price ? `${item.price.toLocaleString()} PKR` : "Price not set"}
-                      </p>
-                      <p className={styles.listingDate}>
-                        {item.date ? new Date(item.date).toLocaleDateString() : "No date"}
-                      </p>
-                    </div>
-                    <div className={styles.listingActions}>
-                      <button
-                        type="button"
-                        className={`${styles.button} ${styles.secondaryButton}`}
-                        onClick={() => (window.location.hash = `#/firebase-edit/${item.id}`)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        className={`${styles.button} ${styles.dangerButton}`}
-                        onClick={() => (window.location.hash = `#/firebase-delete/${item.id}`)}
-                      >
-                        Delete
-                      </button>
+            <h2 className={styles.cardTitle}>Portfolio</h2>
+            {profileData.portfolioItems && profileData.portfolioItems.length > 0 ? (
+              <div className={styles.portfolioGrid}>
+                {profileData.portfolioItems.map((item) => (
+                  <div key={item.id} className={styles.portfolioItem}>
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className={styles.portfolioImage}
+                    />
+                    <div className={styles.portfolioContent}>
+                      <h3 className={styles.portfolioTitle}>{item.title}</h3>
+                      <p className={styles.portfolioDescription}>{item.description}</p>
+                      {isOwnProfile && (
+                        <button
+                          className={styles.deleteButton}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeletePortfolioItem(item.id);
+                          }}
+                        >
+                          Delete
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className={styles.emptyState}>
-                <p>You haven’t posted any projects or services yet.</p>
+                <p>No portfolio items yet.</p>
+                {isOwnProfile && <p>Upload your first project!</p>}
               </div>
             )}
           </div>
-        )}
+        </div>
 
         {/* Reviews Section */}
         {targetUserId && (
@@ -423,7 +415,7 @@ export default function ProfilePage() {
         )}
 
         {/* Payments Table Section */}
-        {targetUserId && (
+        {targetUserId && isOwnProfile && (
           <div style={{ marginTop: "2rem" }}>
             <PaymentsTable studentId={targetUserId} />
           </div>
