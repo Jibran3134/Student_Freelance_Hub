@@ -8,7 +8,9 @@ export default function HomePage() {
   const [userName, setUserName] = useState("Student");
   const [currentUser, setCurrentUser] = useState(null);
   const [bookmarks, setBookmarks] = useState([]);
+  const [sentRequests, setSentRequests] = useState([]);
   const [loadingBookmarks, setLoadingBookmarks] = useState(true);
+  const [loadingRequests, setLoadingRequests] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -36,6 +38,22 @@ export default function HomePage() {
     return () => unsub();
   }, [currentUser?.uid]);
 
+  // Sent Requests listener
+  useEffect(() => {
+    if (!currentUser?.uid) {
+      setSentRequests([]);
+      setLoadingRequests(false);
+      return;
+    }
+    const q = query(collection(db, "sentRequests"), where("userId", "==", currentUser.uid));
+    const unsub = onSnapshot(q, (snapshot) => {
+      const reqs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setSentRequests(reqs);
+      setLoadingRequests(false);
+    });
+    return () => unsub();
+  }, [currentUser?.uid]);
+
   const handleDeleteBookmark = async (bookmarkId) => {
     if (window.confirm("Remove this bookmark?")) {
       try {
@@ -43,6 +61,17 @@ export default function HomePage() {
       } catch (error) {
         console.error("Error deleting bookmark:", error);
         alert("Failed to delete bookmark");
+      }
+    }
+  };
+
+  const handleCancelRequest = async (requestId) => {
+    if (window.confirm("Cancel this request?")) {
+      try {
+        await deleteDoc(doc(db, "sentRequests", requestId));
+      } catch (error) {
+        console.error("Error canceling request:", error);
+        alert("Failed to cancel request");
       }
     }
   };
@@ -85,7 +114,7 @@ export default function HomePage() {
         </div>
 
         <div className="content-layout">
-          {/* Bookmarks */}
+          {/* Left Column - Bookmarks */}
           <div>
             <div className="section-title">📌 Bookmarked ({bookmarks.length})</div>
             {loadingBookmarks ? (
@@ -111,45 +140,78 @@ export default function HomePage() {
                 ))}
               </div>
             )}
-          </div>
 
-          {/* Center - Opportunities */}
-          <div>
-            <div className="section-title">
-              Recommended Opportunities
-              <button className="view-all-btn" onClick={() => window.location.hash = '#/browse'}>View All →</button>
-            </div>
-            {opportunities.map((job) => (
-              <div key={job.id} className="job-card">
-                <div className="job-header">
-                  <div>
-                    <h3 className="job-title">{job.title}</h3>
-                    <p className="job-meta">{job.client} • {job.time}</p>
-                  </div>
-                  <span className="budget-badge">{job.budget}</span>
-                </div>
-                <div className="tags-container">
-                  {job.tags.map((tag, i) => (
-                    <span key={i} className="tag">{tag}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Sidebar */}
-          <div>
-            <div className="sidebar-card">
-              <h3 className="sidebar-title">Quick Actions</h3>
-              <button className="action-btn-primary" onClick={() => window.location.hash = '#/post-service'}>+ Post Service</button>
-              <button className="action-btn-secondary" onClick={() => window.location.hash = '#/browse'}>🔍 Find Work</button>
-            </div>
-            <div>
+            {/* Trending Skills */}
+            <div style={{ marginTop: '2rem' }}>
               <h3 className="sidebar-title">Trending Skills</h3>
               {["React Native", "TypeScript", "UI Design", "SEO", "Content Writing", "Video Editing"].map((skill) => (
                 <span key={skill} className="skill-tag">{skill}</span>
               ))}
             </div>
+          </div>
+
+          {/* Middle Column - Requests Sent */}
+          <div>
+            <div className="section-title">📤 Requests Sent ({sentRequests.length})</div>
+            {loadingRequests ? (
+              <div className="empty-state"><p>Loading...</p></div>
+            ) : sentRequests.length === 0 ? (
+              <div className="empty-state">
+                <p>No requests sent yet</p>
+                <button className="action-btn-secondary" onClick={() => window.location.hash = '#/browse'}>Browse</button>
+              </div>
+            ) : (
+              <div className="bookmarks-list">
+                {sentRequests.map((req) => (
+                  <div key={req.id} className="bookmark-card">
+                    <div className="bookmark-header">
+                      <h4 className="bookmark-title">{req.title}</h4>
+                      <button className="delete-btn" onClick={() => handleCancelRequest(req.id)}>×</button>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <p className="bookmark-category">📁 {req.category}</p>
+                      <span className="bookmark-type">{req.itemType}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - Quick Actions, Opportunities, Trending Skills */}
+          <div>
+            {/* Quick Actions */}
+            <div className="sidebar-card">
+              <h3 className="sidebar-title">Quick Actions</h3>
+              <button className="action-btn-primary" onClick={() => window.location.hash = '#/post-service'}>+ Post Service</button>
+              <button className="action-btn-secondary" onClick={() => window.location.hash = '#/browse'}>🔍 Find Work</button>
+            </div>
+
+            {/* Recommended Opportunities */}
+            <div style={{ marginTop: '2rem' }}>
+              <div className="section-title">
+                Recommended Opportunities
+                <button className="view-all-btn" onClick={() => window.location.hash = '#/browse'}>View All →</button>
+              </div>
+              {opportunities.map((job) => (
+                <div key={job.id} className="job-card">
+                  <div className="job-header">
+                    <div>
+                      <h3 className="job-title">{job.title}</h3>
+                      <p className="job-meta">{job.client} • {job.time}</p>
+                    </div>
+                    <span className="budget-badge">{job.budget}</span>
+                  </div>
+                  <div className="tags-container">
+                    {job.tags.map((tag, i) => (
+                      <span key={i} className="tag">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+
           </div>
         </div>
       </div>
