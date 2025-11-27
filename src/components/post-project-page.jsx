@@ -104,6 +104,7 @@ export default function PostProjectPage() {
       // Save to Firebase Firestore
       await addDoc(collection(db, "projects"), {
         ...formData,
+        ownerId: auth?.currentUser?.uid || "",
         createdAt: serverTimestamp(),
       });
 
@@ -131,13 +132,14 @@ export default function PostProjectPage() {
         preferredCommunication: formData.preferredCommunication,
         personName: formData.personName,
         ownerEmail: normalizedEmail,
+        ownerId: auth?.currentUser?.uid || "",
         userId: auth?.currentUser?.uid || "",
         keywords: buildKeywords(normalizedTitle, normalizedDescription),
         images: [],
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-      
+
       setStatus({ submitting: false, success: "Project posted successfully!", error: null });
       // Reset form
       setFormData({

@@ -7,7 +7,9 @@ import "./styles/navbar.css";
 
 export default function Navbar() {
   const [currentUser, setCurrentUser] = useState(null);
+  const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -18,22 +20,49 @@ export default function Navbar() {
 
   useEffect(() => {
     if (!currentUser?.uid) {
+      setNotifications([]);
       setUnreadCount(0);
       return;
     }
 
+    // Fetch all notifications for the user
     const notifQuery = query(
       collection(db, "notifications"),
-      where("userId", "==", currentUser.uid),
-      where("read", "==", false)
+      where("userId", "==", currentUser.uid)
     );
 
     const unsubscribe = onSnapshot(notifQuery, (snapshot) => {
-      setUnreadCount(snapshot.size);
+      const notifs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+      // Sort client-side
+      notifs.sort((a, b) => {
+        const timeA = a.createdAt?.seconds || 0;
+        const timeB = b.createdAt?.seconds || 0;
+        return timeB - timeA;
+      });
+
+      setNotifications(notifs);
+      setUnreadCount(notifs.filter(n => !n.read).length);
     });
 
     return () => unsubscribe();
   }, [currentUser?.uid]);
+
+  const toggleNotifications = (e) => {
+    e.preventDefault();
+    setShowNotifications(!showNotifications);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showNotifications && !event.target.closest('.navbar-bell-container')) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showNotifications]);
 
   return (
     <nav className="navbar">
@@ -53,10 +82,35 @@ export default function Navbar() {
           <a href="#/disputes" className="navbar-link">Disputes</a>
           <a href="#/contact" className="navbar-link">Contact Us</a>
           <a href="#/manage" className="navbar-link">Manage</a>
-          <a href="#/notifications" className="navbar-link navbar-bell">
-            🔔
-            {unreadCount > 0 && <span className="navbar-badge">{unreadCount}</span>}
-          </a>
+
+          <div className="navbar-bell-container">
+            <a href="#/notifications" className="navbar-link navbar-bell" onClick={toggleNotifications}>
+              🔔
+              {unreadCount > 0 && <span className="navbar-badge">{unreadCount}</span>}
+            </a>
+
+            {showNotifications && (
+              <div className="notifications-dropdown">
+                <div className="notifications-header">
+                  <h3>Notifications</h3>
+                </div>
+                <div className="notifications-list">
+                  {notifications.length === 0 ? (
+                    <div className="notification-empty">No notifications</div>
+                  ) : (
+                    notifications.map((notif) => (
+                      <div key={notif.id} className={`notification-item-dropdown ${notif.type}`}>
+                        <p className="notification-message">{notif.message}</p>
+                        <span className="notification-time">
+                          {notif.createdAt?.seconds ? new Date(notif.createdAt.seconds * 1000).toLocaleDateString() : 'Just now'}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>

@@ -94,6 +94,7 @@ export default function PostServicePage() {
       // Save to Firebase Firestore
       await addDoc(collection(db, "services"), {
         ...formData,
+        ownerId: auth?.currentUser?.uid || "",
         createdAt: serverTimestamp(),
       });
 
@@ -122,13 +123,14 @@ export default function PostServicePage() {
         date: today,
         dateTimestamp: Timestamp.fromDate(new Date()),
         ownerEmail: normalizedEmail,
+        ownerId: auth?.currentUser?.uid || "",
         userId: auth?.currentUser?.uid || "",
         keywords: buildKeywords(normalizedTitle, normalizedDescription),
         images: [],
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-      
+
       setStatus({ submitting: false, success: "Service posted successfully!", error: null });
       // Reset form
       setFormData({
