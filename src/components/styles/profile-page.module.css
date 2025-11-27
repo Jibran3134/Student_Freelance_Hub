@@ -224,12 +224,30 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #9ca3af;
-  border-radius: 0.5rem;
-  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border: 5px solid #8B5CF6;
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+  margin-bottom: 1.5rem;
 }
 
 .lockedIcon {
   margin-bottom: 0.5rem;
   color: #6b7280;
+}
+
+.deleteButton {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.deleteButton:hover {
+  background-color: #dc2626;
 }

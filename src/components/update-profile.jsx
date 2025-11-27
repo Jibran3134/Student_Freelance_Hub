@@ -4,6 +4,13 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import styles from "./styles/update-profile.module.css";
 
+const ADMIN_EMAILS = [
+  "alishba11@gmail.com",
+  "jibran22@gmail.com",
+  "umar33@gmail.com",
+  "abdullah44@gmail.com"
+];
+
 export default function UpdateProfile() {
   const [formData, setFormData] = useState({
     name: "",
@@ -17,16 +24,42 @@ export default function UpdateProfile() {
   const [skillInput, setSkillInput] = useState("");
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(true);
+  const [targetUserId, setTargetUserId] = useState(null);
 
   useEffect(() => {
-    const fetchProfileData = async (user) => {
-      if (!user) {
+    const fetchProfileData = async (currentUser) => {
+      if (!currentUser) {
         window.location.hash = "#/login";
         return;
       }
 
+      // Check for UID in URL (for admin editing)
+      const hash = window.location.hash;
+      const queryIndex = hash.indexOf("?");
+      let targetUid = currentUser.uid;
+      let isAdmin = false;
+
+      if (queryIndex !== -1) {
+        const params = new URLSearchParams(hash.substring(queryIndex));
+        const uidParam = params.get("uid");
+        if (uidParam) {
+          // Check if current user is admin
+          if (ADMIN_EMAILS.includes(currentUser.email)) {
+            targetUid = uidParam;
+            isAdmin = true;
+          } else {
+            // Non-admin trying to edit someone else
+            alert("Unauthorized access");
+            window.location.hash = "#/profile";
+            return;
+          }
+        }
+      }
+
+      setTargetUserId(targetUid);
+
       try {
-        const userDocRef = doc(db, "users", user.uid);
+        const userDocRef = doc(db, "users", targetUid);
         const userDocSnap = await getDoc(userDocRef);
 
         if (userDocSnap.exists()) {
@@ -170,7 +203,7 @@ export default function UpdateProfile() {
         }
       }
 
-      const userDocRef = doc(db, "users", user.uid);
+      const userDocRef = doc(db, "users", targetUserId);
 
       const updateData = {
         name: formData.name,
@@ -185,7 +218,13 @@ export default function UpdateProfile() {
       await updateDoc(userDocRef, updateData);
 
       alert("Profile updated successfully!");
-      window.location.hash = "#/profile";
+      // Redirect back to the profile we were editing
+      if (targetUserId === user.uid) {
+        window.location.hash = "#/profile";
+      } else {
+        window.location.hash = `#/profile?uid=${targetUserId}`;
+      }
+      // Reload to reflect changes
       setTimeout(() => window.location.reload(), 500);
     } catch (error) {
       console.error("Error saving profile:", error);

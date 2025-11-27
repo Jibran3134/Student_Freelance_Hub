@@ -1,7 +1,15 @@
 import React, { useState } from "react";
-import { auth } from "../firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "../firebase";
+import { signInWithEmailAndPassword, deleteUser } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import "./styles/login.css";
+
+const ADMIN_EMAILS = [
+  "alishba11@gmail.com",
+  "jibran22@gmail.com",
+  "umar33@gmail.com",
+  "abdullah44@gmail.com"
+];
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -21,34 +29,63 @@ export default function Login() {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = "Email is invalid";
     }
-    
+
     if (!password) {
       newErrors.password = "Password is required";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const loginUser = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setLoading(true);
     try {
-      const user = await signInWithEmailAndPassword(auth, email, password);
-      console.log("Logged in:", user.user.email);
-      // Redirect to profile or home
-      window.location.hash = "#/profile";
+      const userCred = await signInWithEmailAndPassword(auth, email, password);
+      console.log("Logged in:", userCred.user.email);
+
+      // Check if user is Admin
+      if (ADMIN_EMAILS.includes(userCred.user.email)) {
+        // Admins bypass all validation checks
+        window.location.hash = "#/profile";
+        return;
+      }
+
+      // Check if profile exists
+      const userDocRef = doc(db, "users", userCred.user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+
+        // Check if deleted by admin
+        if (userData.deletedByAdmin) {
+          alert("You have been deleted by the admin.");
+
+          // Delete the auth user so they can't login again and must re-register
+          await deleteUser(userCred.user);
+
+          window.location.hash = "#/register";
+          return;
+        }
+
+        window.location.hash = "#/profile";
+      } else {
+        // Profile missing, redirect to create profile
+        window.location.hash = "#/update-profile";
+      }
     } catch (error) {
       setErrors({ submit: error.message });
     } finally {

@@ -10,7 +10,6 @@ export default function UploadPortfolio() {
     title: "",
     description: "",
     image: null,
-    image: null,
     imagePreview: null,
     visibility: "public",
   });
@@ -116,7 +115,6 @@ export default function UploadPortfolio() {
       title: "",
       description: "",
       image: null,
-      image: null,
       imagePreview: null,
       visibility: "public",
     });
@@ -208,7 +206,6 @@ export default function UploadPortfolio() {
           userId: user.uid,
           title: item.title,
           description: item.description,
-          image: imageUrl,
           image: imageUrl,
           visibility: item.visibility || "public",
           createdAt: new Date().toISOString(),

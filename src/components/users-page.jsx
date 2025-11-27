@@ -3,6 +3,13 @@ import { db, auth } from "../firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import styles from "./styles/users-page.module.css";
 
+const ADMIN_EMAILS = [
+  "alishba11@gmail.com",
+  "jibran22@gmail.com",
+  "umar33@gmail.com",
+  "abdullah44@gmail.com"
+];
+
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +29,10 @@ export default function UsersPage() {
     let q;
     const usersRef = collection(db, "users");
 
-    if (currentUser) {
+    if (currentUser && ADMIN_EMAILS.includes(currentUser.email)) {
+      // Admin sees all users
+      q = query(usersRef);
+    } else if (currentUser) {
       q = query(usersRef, where("visibility", "in", ["public", "students"]));
     } else {
       q = query(usersRef, where("visibility", "==", "public"));
@@ -31,10 +41,12 @@ export default function UsersPage() {
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        const usersList = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const usersList = snapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter((user) => !user.deletedByAdmin); // Filter out deleted users
         setUsers(usersList);
         setLoading(false);
         setError(null);
@@ -121,7 +133,7 @@ export default function UsersPage() {
                 <div className={styles.userInfo}>
                   <h3 className={styles.userName}>{user.name || "Anonymous"}</h3>
                   <span className={styles.visibilityBadge}>
-                    {user.visibility === "public" ? "Public" : "Student Only"}
+                    {user.visibility === "public" ? "Public" : user.visibility === "students" ? "Student Only" : "Private"}
                   </span>
                 </div>
               </div>
