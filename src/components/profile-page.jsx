@@ -6,6 +6,7 @@ import { updateDoc } from "firebase/firestore";
 import styles from "./styles/profile-page.module.css";
 import AverageRating from "./AverageRating";
 import StudentReviews from "./StudentReviews";
+import RateStudent from "./RateStudent";
 import PaymentsTable from "./PaymentsTable";
 
 const ADMIN_EMAILS = [
@@ -406,6 +407,11 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
+
+        {/* Rate Student Section */}
+        {targetUserId && !isOwnProfile && (
+          <RateStudent studentId={targetUserId} />
+        )}
 
         {/* Reviews Section */}
         {targetUserId && (
