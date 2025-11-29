@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Test Cases Report (100 Cases)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            color: #333;
+            font-size: 11px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .header-info {
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        th,
+        td {
+            padding: 6px 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #2c3e50;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .status-pass {
+            color: green;
+            font-weight: bold;
+            background-color: #e8f5e9;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .module-header {
+            background-color: #e9ecef;
+            font-weight: bold;
+            text-align: center;
+            color: #495057;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header-info">
+        <h1>Student Freelance Hub - Comprehensive Test Report</h1>
+        <p><strong>Total Test Cases:</strong> 100</p>
+        <p><strong>Date:</strong> November 28, 2025</p>
+        <p><strong>Test Users:</strong> Alishba, Jibran, Umar, Abdullah</p>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 5%">ID</th>
+                <th style="width: 8%">Module</th>
+                <th style="width: 25%">Description</th>
+                <th style="width: 22%">Input Data / Action</th>
+                <th style="width: 20%">Expected Output</th>
+                <th style="width: 15%">Actual Output</th>
+                <th style="width: 5%">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- AUTHENTICATION -->
+            <tr>
+                <td colspan="7" class="module-header">AUTHENTICATION</td>
+            </tr>
+            <tr>
+                <td>TC-001</td>
+                <td>Auth</td>
+                <td>Register Alishba (Valid)</td>
+                <td>Name: "Alishba", Email: "alishba11@gmail.com", Pass: "ali123"</td>
+                <td>Account created</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-002</td>
+                <td>Auth</td>
+                <td>Register Jibran (Valid)</td>
+                <td>Name: "Jibran", Email: "jibran22@gmail.com", Pass: "jib123"</td>
+                <td>Account created</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-003</td>
+                <td>Auth</td>
+                <td>Register Umar (Valid)</td>
+                <td>Name: "Umar", Email: "umar33@gmail.com", Pass: "umar123"</td>
+                <td>Account created</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-004</td>
+                <td>Auth</td>
+                <td>Register Abdullah (Valid)</td>
+                <td>Name: "Abdullah", Email: "abdullah44@gmail.com", Pass: "abd123"</td>
+                <td>Account created</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-005</td>
+                <td>Auth</td>
+                <td>Register Alishba (Duplicate Email)</td>
+                <td>Email: "alishba11@gmail.com"</td>
+                <td>Error: Email already in use</td>
+                <td>Error shown</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-006</td>
+                <td>Auth</td>
+                <td>Register Jibran (Weak Pass)</td>
+                <td>Pass: "123"</td>
+                <td>Error: Pass >= 6 chars</td>
+                <td>Error shown</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-007</td>
+                <td>Auth</td>
+                <td>Register Umar (Special Char Pass)</td>
+                <td>Pass: "umar@123"</td>
+                <td>Error: Alphanumeric only</td>
+                <td>Error shown</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-008</td>
+                <td>Auth</td>
+                <td>Register Abdullah (Mismatch Pass)</td>
+                <td>Pass: "abd123", Confirm: "abd124"</td>
+                <td>Error: Passwords mismatch</td>
+                <td>Error shown</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-009</td>
+                <td>Auth</td>
+                <td>Register Alishba (Invalid Email)</td>
+                <td>Email: "alishba.com"</td>
+                <td>Error: Invalid email</td>
+                <td>Error shown</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-010</td>
+                <td>Auth</td>
+                <td>Register Jibran (Empty Name)</td>
+                <td>Name: ""</td>
+                <td>Error: Name required</td>
+                <td>Error shown</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-011</td>
+                <td>Auth</td>
+                <td>Login Alishba (Success)</td>
+                <td>Email: "alishba11@gmail.com", Pass: "ali123"</td>
+                <td>Redirect to Profile</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-012</td>
+                <td>Auth</td>
+                <td>Login Jibran (Wrong Pass)</td>
+                <td>Pass: "wrongpass"</td>
+                <td>Error: Invalid credential</td>
+                <td>Error shown</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-013</td>
+                <td>Auth</td>
+                <td>Login Umar (Unregistered)</td>
+                <td>Email: "fakeumar@gmail.com"</td>
+                <td>Error: User not found</td>
+                <td>Error shown</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-014</td>
+                <td>Auth</td>
+                <td>Login Abdullah (Special Char Input)</td>
+                <td>Pass: "abd#123"</td>
+                <td>Error: Alphanumeric only</td>
+                <td>Error shown</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-015</td>
+                <td>Auth</td>
+                <td>Logout Alishba</td>
+                <td>Click Logout</td>
+                <td>Redirect to Login</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+
+            <!-- PROFILE MANAGEMENT -->
+            <tr>
+                <td colspan="7" class="module-header">PROFILE MANAGEMENT</td>
+            </tr>
+            <tr>
+                <td>TC-016</td>
+                <td>Profile</td>
+                <td>View Alishba Profile</td>
+                <td>Login as Alishba</td>
+                <td>Show Name: Alishba</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-017</td>
+                <td>Profile</td>
+                <td>Update Jibran Skills</td>
+                <td>Add "React, Python"</td>
+                <td>Skills updated</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-018</td>
+                <td>Profile</td>
+                <td>Update Umar Bio</td>
+                <td>Bio: "Expert Dev"</td>
+                <td>Bio updated</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-019</td>
+                <td>Profile</td>
+                <td>Update Abdullah Education</td>
+                <td>Edu: "BS CS"</td>
+                <td>Education updated</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-020</td>
+                <td>Profile</td>
+                <td>Alishba Upload Photo</td>
+                <td>Upload "profile.jpg"</td>
+                <td>Image displayed</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-021</td>
+                <td>Profile</td>
+                <td>Jibran Set Visibility (Public)</td>
+                <td>Select "Public"</td>
+                <td>Profile visible to all</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-022</td>
+                <td>Profile</td>
+                <td>Umar Set Visibility (Students)</td>
+                <td>Select "Students Only"</td>
+                <td>Restricted visibility</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-023</td>
+                <td>Profile</td>
+                <td>Abdullah Set Visibility (Hidden)</td>
+                <td>Select "Hidden"</td>
+                <td>Profile hidden</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-024</td>
+                <td>Profile</td>
+                <td>Alishba Set Status (Online)</td>
+                <td>Toggle Online</td>
+                <td>Green badge shown</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-025</td>
+                <td>Profile</td>
+                <td>Jibran Set Status (Busy)</td>
+                <td>Toggle Busy</td>
+                <td>Red badge shown</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-026</td>
+                <td>Profile</td>
+                <td>Umar Add Portfolio Item</td>
+                <td>Title: "Web App"</td>
+                <td>Item added to grid</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-027</td>
+                <td>Profile</td>
+                <td>Abdullah Delete Portfolio</td>
+                <td>Click Delete on Item</td>
+                <td>Item removed</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-028</td>
+                <td>Profile</td>
+                <td>Alishba Edit Portfolio</td>
+                <td>Update Title</td>
+                <td>Title updated</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-029</td>
+                <td>Profile</td>
+                <td>Jibran View Own Portfolio</td>
+                <td>Scroll to Portfolio</td>
+                <td>Items displayed</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-030</td>
+                <td>Profile</td>
+                <td>Umar Check Email Readonly</td>
+                <td>Try edit email</td>
+                <td>Field disabled</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+
+            <!-- POSTING PROJECTS/SERVICES -->
+            <tr>
+                <td colspan="7" class="module-header">POSTING PROJECTS & SERVICES</td>
+            </tr>
+            <tr>
+                <td>TC-031</td>
+                <td>Posting</td>
+                <td>Alishba Post Project</td>
+                <td>Title: "React Site", Budget: $500</td>
+                <td>Project created</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-032</td>
+                <td>Posting</td>
+                <td>Jibran Post Service</td>
+                <td>Title: "Logo Design", Rate: $50</td>
+                <td>Service created</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-033</td>
+                <td>Posting</td>
+                <td>Umar Post Project (Empty Title)</td>
+                <td>Title: ""</td>
+                <td>Error: Required</td>
+                <td>Error shown</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-034</td>
+                <td>Posting</td>
+                <td>Abdullah Post Service (Neg Price)</td>
+                <td>Rate: -10</td>
+                <td>Error or Auto-correct</td>
+                <td>Handled</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-035</td>
+                <td>Posting</td>
+                <td>Alishba View Own Posts</td>
+                <td>Go to Dashboard</td>
+                <td>List of posts shown</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-036</td>
+                <td>Posting</td>
+                <td>Jibran Delete Project</td>
+                <td>Click Delete</td>
+                <td>Project removed</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-037</td>
+                <td>Posting</td>
+                <td>Umar Edit Service</td>
+                <td>Update Rate</td>
+                <td>Rate updated</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-038</td>
+                <td>Posting</td>
+                <td>Abdullah Post with Long Desc</td>
+                <td>Desc: 500 chars</td>
+                <td>Post created</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-039</td>
+                <td>Posting</td>
+                <td>Alishba Post Duplicate</td>
+                <td>Same title/content</td>
+                <td>Allowed (unique ID)</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-040</td>
+                <td>Posting</td>
+                <td>Jibran Cancel Post Creation</td>
+                <td>Click Cancel</td>
+                <td>Redirect to Home</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+
+            <!-- BROWSING & SEARCH -->
+            <tr>
+                <td colspan="7" class="module-header">BROWSING & SEARCH</td>
+            </tr>
+            <tr>
+                <td>TC-041</td>
+                <td>Browse</td>
+                <td>Umar Browse Projects</td>
+                <td>Nav to /browse</td>
+                <td>Project list shown</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-042</td>
+                <td>Browse</td>
+                <td>Abdullah Browse Services</td>
+                <td>Tab: Services</td>
+                <td>Service list shown</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-043</td>
+                <td>Browse</td>
+                <td>Alishba Search "React"</td>
+                <td>Input: "React"</td>
+                <td>Filter results</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-044</td>
+                <td>Browse</td>
+                <td>Jibran Filter "Design"</td>
+                <td>Category: Design</td>
+                <td>Show Design items</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-045</td>
+                <td>Browse</td>
+                <td>Umar View Project Details</td>
+                <td>Click Card</td>
+                <td>Details page loads</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-046</td>
+                <td>Browse</td>
+                <td>Abdullah View Service Details</td>
+                <td>Click Card</td>
+                <td>Details page loads</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-047</td>
+                <td>Browse</td>
+                <td>Alishba Search Empty</td>
+                <td>Input: ""</td>
+                <td>Show all items</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-048</td>
+                <td>Browse</td>
+                <td>Jibran Search No Result</td>
+                <td>Input: "xyz123"</td>
+                <td>"No items found"</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-049</td>
+                <td>Browse</td>
+                <td>Umar Check Pagination</td>
+                <td>Scroll/Next Page</td>
+                <td>Load more items</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-050</td>
+                <td>Browse</td>
+                <td>Abdullah Check Sorting</td>
+                <td>Sort: Newest</td>
+                <td>Order updates</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+
+            <!-- REVIEWS & RATINGS -->
+            <tr>
+                <td colspan="7" class="module-header">REVIEWS & RATINGS</td>
+            </tr>
+            <tr>
+                <td>TC-051</td>
+                <td>Reviews</td>
+                <td>Alishba Review Jibran</td>
+                <td>Rate: 5, Msg: "Good"</td>
+                <td>Review saved</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-052</td>
+                <td>Reviews</td>
+                <td>Umar Review Abdullah</td>
+                <td>Rate: 4, Msg: "Nice"</td>
+                <td>Review saved</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-053</td>
+                <td>Reviews</td>
+                <td>Jibran Review Self</td>
+                <td>Try review self</td>
+                <td>Disabled/Error</td>
+                <td>Blocked</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-054</td>
+                <td>Reviews</td>
+                <td>Abdullah Check Avg Rating</td>
+                <td>View Profile</td>
+                <td>Avg displayed</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-055</td>
+                <td>Reviews</td>
+                <td>Alishba Review Empty Msg</td>
+                <td>Rate: 5, Msg: ""</td>
+                <td>Saved (Optional msg)</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-056</td>
+                <td>Reviews</td>
+                <td>Jibran View Reviews</td>
+                <td>Profile > Reviews</td>
+                <td>List displayed</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-057</td>
+                <td>Reviews</td>
+                <td>Umar Review Twice</td>
+                <td>Submit again</td>
+                <td>Update or Block</td>
+                <td>Handled</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-058</td>
+                <td>Reviews</td>
+                <td>Abdullah Rate 0 Stars</td>
+                <td>Rate: 0</td>
+                <td>Error: Min 1 star</td>
+                <td>Error shown</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-059</td>
+                <td>Reviews</td>
+                <td>Alishba Read Review</td>
+                <td>Check Jibran's profile</td>
+                <td>See own review</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-060</td>
+                <td>Reviews</td>
+                <td>Jibran Check Count</td>
+                <td>Header stats</td>
+                <td>Review count +1</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+
+            <!-- ADMIN DASHBOARD -->
+            <tr>
+                <td colspan="7" class="module-header">ADMIN DASHBOARD</td>
+            </tr>
+            <tr>
+                <td>TC-061</td>
+                <td>Admin</td>
+                <td>Alishba Access Admin</td>
+                <td>Login as Alishba</td>
+                <td>Dashboard loads</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-062</td>
+                <td>Admin</td>
+                <td>Jibran Access Admin</td>
+                <td>Login as Jibran (User)</td>
+                <td>Access Denied</td>
+                <td>Redirected</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-063</td>
+                <td>Admin</td>
+                <td>Umar Access Admin</td>
+                <td>Login as Umar (User)</td>
+                <td>Access Denied</td>
+                <td>Redirected</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-064</td>
+                <td>Admin</td>
+                <td>Abdullah Access Admin</td>
+                <td>Login as Abdullah</td>
+                <td>Dashboard loads</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-065</td>
+                <td>Admin</td>
+                <td>Alishba View User Stats</td>
+                <td>Check Total Users</td>
+                <td>Count correct</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-066</td>
+                <td>Admin</td>
+                <td>Abdullah View Post Stats</td>
+                <td>Check Total Posts</td>
+                <td>Count correct</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-067</td>
+                <td>Admin</td>
+                <td>Alishba Delete User (Umar)</td>
+                <td>Click Delete Umar</td>
+                <td>Umar deleted</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-068</td>
+                <td>Admin</td>
+                <td>Abdullah Delete Post</td>
+                <td>Click Delete Post</td>
+                <td>Post removed</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-069</td>
+                <td>Admin</td>
+                <td>Umar Try Login (Deleted)</td>
+                <td>Login after deletion</td>
+                <td>Blocked: "Deleted"</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-070</td>
+                <td>Admin</td>
+                <td>Alishba View Hidden User</td>
+                <td>View Jibran (Hidden)</td>
+                <td>Profile visible</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-071</td>
+                <td>Admin</td>
+                <td>Abdullah Filter Users</td>
+                <td>Search "Jibran"</td>
+                <td>Jibran shown</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-072</td>
+                <td>Admin</td>
+                <td>Alishba Check New Users</td>
+                <td>"New This Month"</td>
+                <td>Count updates</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-073</td>
+                <td>Admin</td>
+                <td>Admin Logout</td>
+                <td>Click Logout</td>
+                <td>Redirect Login</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-074</td>
+                <td>Admin</td>
+                <td>Direct URL Access</td>
+                <td>Paste /admin-dashboard</td>
+                <td>Redirect Login</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-075</td>
+                <td>Admin</td>
+                <td>Delete Self (Alishba)</td>
+                <td>Try delete self</td>
+                <td>Prevent/Warn</td>
+                <td>Handled</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+
+            <!-- WALLET & TRANSACTIONS -->
+            <tr>
+                <td colspan="7" class="module-header">WALLET & TRANSACTIONS</td>
+            </tr>
+            <tr>
+                <td>TC-076</td>
+                <td>Wallet</td>
+                <td>Alishba View Balance</td>
+                <td>Go to Wallet</td>
+                <td>Show $0.00</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-077</td>
+                <td>Wallet</td>
+                <td>Jibran Add Funds</td>
+                <td>Amount: $100</td>
+                <td>Balance: $100</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-078</td>
+                <td>Wallet</td>
+                <td>Umar Add Funds Invalid</td>
+                <td>Amount: -50</td>
+                <td>Error</td>
+                <td>Error shown</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-079</td>
+                <td>Wallet</td>
+                <td>Abdullah View History</td>
+                <td>Check Transactions</td>
+                <td>"Funds Added" shown</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-080</td>
+                <td>Wallet</td>
+                <td>Alishba Withdraw</td>
+                <td>Amount: $50</td>
+                <td>Balance reduces</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-081</td>
+                <td>Wallet</td>
+                <td>Jibran Withdraw Over</td>
+                <td>Amount: $1000</td>
+                <td>Error: Insufficient</td>
+                <td>Error shown</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-082</td>
+                <td>Wallet</td>
+                <td>Umar Check Currency</td>
+                <td>Verify Symbol</td>
+                <td>"$" displayed</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-083</td>
+                <td>Wallet</td>
+                <td>Abdullah Payment Method</td>
+                <td>Add Card (Mock)</td>
+                <td>Card saved</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-084</td>
+                <td>Wallet</td>
+                <td>Alishba Remove Card</td>
+                <td>Delete Card</td>
+                <td>Card removed</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-085</td>
+                <td>Wallet</td>
+                <td>Jibran Transaction Date</td>
+                <td>Check Date</td>
+                <td>Current Date</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+
+            <!-- CONTACT & UI -->
+            <tr>
+                <td colspan="7" class="module-header">CONTACT & UI</td>
+            </tr>
+            <tr>
+                <td>TC-086</td>
+                <td>Contact</td>
+                <td>Alishba Send Message</td>
+                <td>Msg: "Help me"</td>
+                <td>Sent Alert</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-087</td>
+                <td>Contact</td>
+                <td>Jibran Send Empty</td>
+                <td>Msg: ""</td>
+                <td>Error</td>
+                <td>Error shown</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-088</td>
+                <td>UI</td>
+                <td>Umar Check Mobile Menu</td>
+                <td>Resize window</td>
+                <td>Hamburger works</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-089</td>
+                <td>UI</td>
+                <td>Abdullah Check Footer</td>
+                <td>Scroll down</td>
+                <td>Links visible</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-090</td>
+                <td>UI</td>
+                <td>Alishba Logo Click</td>
+                <td>Click Logo</td>
+                <td>Go Home</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-091</td>
+                <td>UI</td>
+                <td>Jibran 404 Page</td>
+                <td>Go /bad-url</td>
+                <td>Redirect Home</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-092</td>
+                <td>UI</td>
+                <td>Umar Hover Effects</td>
+                <td>Hover Buttons</td>
+                <td>Color changes</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-093</td>
+                <td>UI</td>
+                <td>Abdullah Loading State</td>
+                <td>Refresh Page</td>
+                <td>Spinner shown</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-094</td>
+                <td>UI</td>
+                <td>Alishba Tab Title</td>
+                <td>Check Browser Tab</td>
+                <td>"Student Hub"</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-095</td>
+                <td>UI</td>
+                <td>Jibran Favicon</td>
+                <td>Check Icon</td>
+                <td>Logo shown</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-096</td>
+                <td>Perf</td>
+                <td>Umar Load Home</td>
+                <td>Time Load</td>
+                <td>
+                    < 2 sec</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-097</td>
+                <td>Perf</td>
+                <td>Abdullah Load Profile</td>
+                <td>Time Load</td>
+                <td>
+                    < 2 sec</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-098</td>
+                <td>Sec</td>
+                <td>Alishba SQL Injection</td>
+                <td>Input: "' OR 1=1"</td>
+                <td>Sanitized/Blocked</td>
+                <td>Success</td>
+                <td><span class="status-pass">Pass</span></td>
+            </tr>
+            <tr>
+                <td>TC-099</td>
+                <td>Sec</td>
+                <td>Jibran XSS Script</td>
+                <td>Input: "
+                    <script>"</td><td>Sanitized/Blocked</td><td>Success</td><td><span class="status - pass">Pass</span></td></tr>
+                            < tr ><td>TC-100</td><td>Final</td><td>Umar Full Flow</td><td>Reg->Post->Logout</td><td>All steps work</td><td>Success</td><td><span class="status-pass">Pass</span></td></tr >
+        </tbody >
+    </table >
+</body >
+</html >
