@@ -4,6 +4,13 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import styles from "./styles/update-profile.module.css";
 
+const ADMIN_EMAILS = [
+  "alishba11@gmail.com",
+  "jibran22@gmail.com",
+  "umar33@gmail.com",
+  "abdullah44@gmail.com"
+];
+
 export default function UpdateProfile() {
   const [formData, setFormData] = useState({
     name: "",
@@ -20,6 +27,7 @@ export default function UpdateProfile() {
   const [skillInput, setSkillInput] = useState("");
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [targetUserId, setTargetUserId] = useState(null);
 
   useEffect(() => {
     const fetchProfileData = async (user) => {
@@ -31,14 +39,14 @@ export default function UpdateProfile() {
       // Check for UID in URL (for admin editing)
       const hash = window.location.hash;
       const queryIndex = hash.indexOf("?");
-      let targetUid = currentUser.uid;
+      let targetUid = user.uid;
 
       if (queryIndex !== -1) {
         const params = new URLSearchParams(hash.substring(queryIndex));
         const uidParam = params.get("uid");
         if (uidParam) {
           // Check if current user is admin
-          if (ADMIN_EMAILS.includes(currentUser.email)) {
+          if (ADMIN_EMAILS.includes(user.email)) {
             targetUid = uidParam;
           } else {
             // Non-admin trying to edit someone else
@@ -189,32 +197,32 @@ export default function UpdateProfile() {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
     }
-    
+
     if (formData.skills.length === 0) {
       newErrors.skills = "At least one skill is required";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     // Confirmation alert before saving
     const confirmSave = window.confirm("Are you sure you want to save these changes?");
     if (!confirmSave) {
       return; // User cancelled, don't proceed
     }
-    
+
     const user = auth.currentUser;
     if (!user) {
       window.location.hash = "#/login";
@@ -223,13 +231,13 @@ export default function UpdateProfile() {
 
     setLoading(true);
     setErrors({}); // Clear previous errors
-    
+
     console.log("=== Starting Profile Save ===");
     console.log("Form Data:", formData);
     console.log("Profile Picture File:", formData.profilePicture);
     console.log("Is File?", formData.profilePicture instanceof File);
     console.log("File Type:", typeof formData.profilePicture);
-    
+
     try {
       let profilePictureUrl = formData.profilePicturePreview;
       let coverPhotoUrl = formData.coverPhotoPreview;
@@ -275,7 +283,7 @@ export default function UpdateProfile() {
       // Update user profile in Firestore
       console.log("Updating Firestore profile with URL:", profilePictureUrl);
       const userDocRef = doc(db, "users", user.uid);
-      
+
       const updateData = {
         name: formData.name,
         skills: formData.skills,

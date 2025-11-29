@@ -4,6 +4,13 @@ import { signInWithEmailAndPassword, deleteUser, signInWithPopup } from "firebas
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import "./styles/login.css";
 
+const ADMIN_EMAILS = [
+  "alishba11@gmail.com",
+  "jibran22@gmail.com",
+  "umar33@gmail.com",
+  "abdullah44@gmail.com"
+];
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,30 +29,30 @@ export default function Login() {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = "Email is invalid";
     }
-    
+
     if (!password) {
       newErrors.password = "Password is required";
     } else if (!/^[a-zA-Z0-9]+$/.test(password)) {
       newErrors.password = "Password must contain only letters and numbers";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const loginUser = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setLoading(true);
     try {
       const userCred = await signInWithEmailAndPassword(auth, email, password);
