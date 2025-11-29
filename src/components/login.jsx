@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { auth } from "../firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, db, googleProvider } from "../firebase";
+import { signInWithEmailAndPassword, deleteUser, signInWithPopup } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import "./styles/login.css";
 
 export default function Login() {
@@ -30,6 +31,8 @@ export default function Login() {
     
     if (!password) {
       newErrors.password = "Password is required";
+    } else if (!/^[a-zA-Z0-9]+$/.test(password)) {
+      newErrors.password = "Password must contain only letters and numbers";
     }
     
     setErrors(newErrors);
@@ -45,10 +48,48 @@ export default function Login() {
     
     setLoading(true);
     try {
-      const user = await signInWithEmailAndPassword(auth, email, password);
-      console.log("Logged in:", user.user.email);
-      // Redirect to profile or home
-      window.location.hash = "#/profile";
+      const userCred = await signInWithEmailAndPassword(auth, email, password);
+      console.log("Logged in:", userCred.user.email);
+
+      // Check if user is Admin
+      if (ADMIN_EMAILS.includes(userCred.user.email)) {
+        // Admins bypass all validation checks
+        window.location.hash = "#/profile";
+        return;
+      }
+
+      // Check if profile exists
+      const userDocRef = doc(db, "users", userCred.user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+
+        // Check if deleted by admin
+        if (userData.deletedByAdmin) {
+          alert("You have been deleted by the admin.");
+
+          // Delete the auth user so they can't login again and must re-register
+          await deleteUser(userCred.user);
+
+          window.location.hash = "#/register";
+          return;
+        }
+
+        window.location.hash = "#/profile";
+      } else {
+        // Profile missing, auto-create it
+        await setDoc(userDocRef, {
+          name: userCred.user.displayName || "User",
+          email: userCred.user.email,
+          skills: [],
+          education: "",
+          profilePicture: userCred.user.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+        window.location.hash = "#/profile";
+      }
     } catch (error) {
       setErrors({ submit: error.message });
     } finally {
@@ -56,9 +97,52 @@ export default function Login() {
     }
   };
 
-  const handleSocialLogin = (provider) => {
-    // Placeholder for social login implementation
-    console.log(`Social login with ${provider}`);
+  const handleSocialLogin = async (providerName) => {
+    setLoading(true);
+    try {
+      const provider = googleProvider;
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Check if user is Admin
+      if (ADMIN_EMAILS.includes(user.email)) {
+        window.location.hash = "#/profile";
+        return;
+      }
+
+      // Check if profile exists
+      const docRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        if (userData.deletedByAdmin) {
+          alert("You have been deleted by the admin.");
+          await deleteUser(user);
+          window.location.hash = "#/register";
+          return;
+        }
+      } else {
+        // Auto-create profile if it doesn't exist (Sign Up via Login)
+        await setDoc(docRef, {
+          name: user.displayName || "User",
+          email: user.email,
+          skills: [],
+          education: "",
+          profilePicture: user.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+
+      console.log(`Social login success with ${providerName}`);
+      window.location.hash = "#/profile";
+    } catch (error) {
+      console.error("Social login error:", error);
+      setErrors({ submit: error.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleForgotPassword = () => {
@@ -70,8 +154,8 @@ export default function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1 className="login-title">Welcome Back</h1>
-        <p className="login-subtitle">Sign in to your account to continue</p>
+        <h1 className="login-title">Login</h1>
+        <p className="login-subtitle">Login to your account to continue</p>
 
         <div className="login-social-buttons">
           <button
@@ -99,21 +183,12 @@ export default function Login() {
             </svg>
             Google
           </button>
-          <button
-            type="button"
-            className="login-social-button"
-            onClick={() => handleSocialLogin("GitHub")}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-            </svg>
-            GitHub
-          </button>
+
         </div>
 
         <div className="login-divider">
           <div className="login-divider-line"></div>
-          <span className="login-divider-text">or sign in with email</span>
+          <span className="login-divider-text">or login with email</span>
           <div className="login-divider-line"></div>
         </div>
 
@@ -168,7 +243,7 @@ export default function Login() {
             className="login-button"
             disabled={loading}
           >
-            {loading ? "Signing In..." : "Sign In"}
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
@@ -178,7 +253,7 @@ export default function Login() {
             className="login-signup-button"
             onClick={() => (window.location.hash = "#/register")}
           >
-            Sign Up
+            Signup
           </span>
         </div>
       </div>

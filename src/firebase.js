@@ -1,9 +1,9 @@
 // src/firebase.js
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getAuth } from "firebase/auth";          // ← added for authentication
+import { getAuth, GoogleAuthProvider } from "firebase/auth";          // ← added for authentication
 import { getFirestore } from "firebase/firestore"; // ← added for Firestore
-import { getStorage } from "firebase/storage";  
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBLofdZMyAkYctJR7e9zLeetDw2NO4aazo",
@@ -23,6 +23,9 @@ const analytics = getAnalytics(app);
 const auth = getAuth(app); // Firebase Authentication
 const db = getFirestore(app); // Firestore database
 const storage = getStorage(app);
+const googleProvider = new GoogleAuthProvider();
+
 // Export them for use in other files
-export { auth, db, storage };
+// Export them for use in other files
+export { auth, db, storage, analytics, googleProvider };
 export default app;
