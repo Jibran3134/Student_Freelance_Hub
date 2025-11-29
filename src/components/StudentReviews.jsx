@@ -5,7 +5,6 @@ import {
   query,
   where,
   getDocs,
-  orderBy,
   doc,
   getDoc,
   onSnapshot,
@@ -50,8 +49,6 @@ export default function StudentReviews({
 
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       try {
-        const reviewsData = [];
-
         // Process all reviews in parallel
         const reviewPromises = snapshot.docs.map(async (docSnapshot) => {
           const reviewData = docSnapshot.data();
