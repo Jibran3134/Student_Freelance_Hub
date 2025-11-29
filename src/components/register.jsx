@@ -77,7 +77,7 @@ export default function Register() {
         email: formData.email,
         skills: [],
         education: "",
-        profilePicture: getRandomProfileImage(),
+        profilePicture: getRandomProfileImage(formData.name),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
@@ -105,12 +105,13 @@ export default function Register() {
 
       if (!docSnap.exists()) {
         // Create new profile
+        const userName = user.displayName || "User";
         await setDoc(docRef, {
-          name: user.displayName || "User",
+          name: userName,
           email: user.email,
           skills: [],
           education: "",
-          profilePicture: user.photoURL || getRandomProfileImage(),
+          profilePicture: user.photoURL || getRandomProfileImage(userName),
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });

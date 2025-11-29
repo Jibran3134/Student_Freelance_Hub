@@ -87,12 +87,13 @@ export default function Login() {
         window.location.hash = "#/profile";
       } else {
         // Profile missing, auto-create it
+        const userName = userCred.user.displayName || "User";
         await setDoc(userDocRef, {
-          name: userCred.user.displayName || "User",
+          name: userName,
           email: userCred.user.email,
           skills: [],
           education: "",
-          profilePicture: userCred.user.photoURL || getRandomProfileImage(),
+          profilePicture: userCred.user.photoURL || getRandomProfileImage(userName),
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
@@ -132,12 +133,13 @@ export default function Login() {
         }
       } else {
         // Auto-create profile if it doesn't exist (Sign Up via Login)
+        const userName = user.displayName || "User";
         await setDoc(docRef, {
-          name: user.displayName || "User",
+          name: userName,
           email: user.email,
           skills: [],
           education: "",
-          profilePicture: user.photoURL || getRandomProfileImage(),
+          profilePicture: user.photoURL || getRandomProfileImage(userName),
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
