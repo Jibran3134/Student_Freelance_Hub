@@ -28,7 +28,6 @@ export default function RateStudent({ studentId, jobId = "general", reviewerId, 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [hasRated, setHasRated] = useState(false);
-  const [currentReviewerId, setCurrentReviewerId] = useState(null);
 
   // Check if current user has already rated this job/student
   useEffect(() => {
@@ -36,7 +35,6 @@ export default function RateStudent({ studentId, jobId = "general", reviewerId, 
       if (!auth.currentUser || !studentId) return;
 
       const currentUserId = auth.currentUser.uid;
-      setCurrentReviewerId(currentUserId);
 
       try {
         const ratingsRef = collection(db, "ratings");

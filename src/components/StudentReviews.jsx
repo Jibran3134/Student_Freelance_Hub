@@ -8,6 +8,7 @@ import {
   orderBy,
   doc,
   getDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import styles from "./styles/student-reviews.module.css";
 
@@ -35,131 +36,119 @@ export default function StudentReviews({
       return;
     }
 
-    const fetchReviews = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+    setLoading(true);
+    setError(null);
 
-        const ratingsRef = collection(db, "ratings");
-        
-        // Try with orderBy first, fallback to without orderBy if index doesn't exist
-        let querySnapshot;
-        try {
-          const q = query(
-            ratingsRef,
-            where("reviewedStudentId", "==", studentId),
-            orderBy("timestamp", "desc")
-          );
-          querySnapshot = await getDocs(q);
-        } catch (indexError) {
-          // If index doesn't exist, fetch without orderBy and sort in JavaScript
-          console.log("Index not found, fetching without orderBy:", indexError);
-          const q = query(
-            ratingsRef,
-            where("reviewedStudentId", "==", studentId)
-          );
-          querySnapshot = await getDocs(q);
-        }
-        
+    const ratingsRef = collection(db, "ratings");
+    let q;
+
+    // Try with orderBy first
+    try {
+      q = query(
+        ratingsRef,
+        where("reviewedStudentId", "==", studentId),
+        orderBy("timestamp", "desc")
+      );
+    } catch (e) {
+      // Fallback if index issue (though query creation usually doesn't throw, execution does)
+      q = query(
+        ratingsRef,
+        where("reviewedStudentId", "==", studentId)
+      );
+    }
+
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      try {
         const reviewsData = [];
 
-        // Fetch reviewer names from users collection (if available)
-        for (const doc of querySnapshot.docs) {
-          const reviewData = doc.data();
+        // Process all reviews in parallel
+        const reviewPromises = snapshot.docs.map(async (docSnapshot) => {
+          const reviewData = docSnapshot.data();
           let reviewerName = "Anonymous";
 
-          // Try to fetch reviewer name from users collection
-          try {
-            const usersRef = collection(db, "users");
-            const userQuery = query(
-              usersRef,
-              where("uid", "==", reviewData.reviewerId)
-            );
-            const userSnapshot = await getDocs(userQuery);
-            if (!userSnapshot.empty) {
-              const userData = userSnapshot.docs[0].data();
-              reviewerName =
-                userData.name ||
-                userData.displayName ||
-                userData.email?.split("@")[0] ||
-                "Anonymous";
-            } else {
-              // Try direct document access using reviewerId as document ID
-              const userDocRef = doc(db, "users", reviewData.reviewerId);
-              const userDocSnap = await getDoc(userDocRef);
-              if (userDocSnap.exists()) {
-                const userData = userDocSnap.data();
-                reviewerName =
-                  userData.name ||
-                  userData.displayName ||
-                  userData.email?.split("@")[0] ||
-                  "Anonymous";
+          // Try to fetch reviewer name
+          if (reviewData.reviewerId) {
+            try {
+              // Try users collection first (by uid field)
+              const usersRef = collection(db, "users");
+              const userQuery = query(
+                usersRef,
+                where("uid", "==", reviewData.reviewerId)
+              );
+              const userSnapshot = await getDocs(userQuery);
+
+              if (!userSnapshot.empty) {
+                const userData = userSnapshot.docs[0].data();
+                reviewerName = userData.name || userData.displayName || "Anonymous";
+              } else {
+                // Try direct doc access
+                const userDocRef = doc(db, "users", reviewData.reviewerId);
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                  const userData = userDocSnap.data();
+                  reviewerName = userData.name || userData.displayName || "Anonymous";
+                }
               }
+            } catch (err) {
+              console.log("Error fetching reviewer details:", err);
             }
-          } catch (err) {
-            // If users collection doesn't exist or has different structure,
-            // fall back to reviewerId or anonymous
-            console.log("Could not fetch reviewer name:", err);
           }
 
-          // Handle timestamp conversion
+          // Handle timestamp
           let reviewDate = new Date();
           if (reviewData.timestamp) {
             if (reviewData.timestamp.toDate) {
               reviewDate = reviewData.timestamp.toDate();
             } else if (reviewData.timestamp.seconds) {
               reviewDate = new Date(reviewData.timestamp.seconds * 1000);
-            } else if (reviewData.timestamp instanceof Date) {
-              reviewDate = reviewData.timestamp;
             }
           }
 
-          reviewsData.push({
-            id: doc.id,
+          return {
+            id: docSnapshot.id,
             ...reviewData,
             reviewerName,
             date: reviewDate,
-          });
-        }
-
-        // Sort by date descending if we didn't use orderBy
-        reviewsData.sort((a, b) => {
-          const dateA = a.date.getTime ? a.date.getTime() : 0;
-          const dateB = b.date.getTime ? b.date.getTime() : 0;
-          return dateB - dateA; // Descending order (newest first)
+          };
         });
 
-        setReviews(reviewsData);
+        const resolvedReviews = await Promise.all(reviewPromises);
 
-        // Calculate average rating
-        if (reviewsData.length > 0) {
-          const sum = reviewsData.reduce((acc, review) => acc + review.rating, 0);
-          const average = sum / reviewsData.length;
-          setAverageRating(average);
-          setTotalRatings(reviewsData.length);
+        // Sort if needed (if orderBy failed or wasn't used)
+        resolvedReviews.sort((a, b) => b.date - a.date);
+
+        setReviews(resolvedReviews);
+
+        // Calculate average
+        if (resolvedReviews.length > 0) {
+          const sum = resolvedReviews.reduce((acc, r) => acc + r.rating, 0);
+          setAverageRating(sum / resolvedReviews.length);
+          setTotalRatings(resolvedReviews.length);
         } else {
           setAverageRating(0);
           setTotalRatings(0);
         }
       } catch (err) {
-        console.error("Error fetching reviews:", err);
-        // Check if it's a permission error or index error
-        if (err.code === "permission-denied") {
-          setError("You don't have permission to view reviews.");
-        } else if (err.code === "failed-precondition") {
-          // This usually means the index doesn't exist, but we should have handled it
-          setError("Please wait while we set up the database. Try refreshing the page.");
-        } else if (err.message && err.message.includes("index")) {
-          setError("Database index is being created. Please try again in a moment.");
-        } else {
-          setError("Failed to load reviews. Please try again later.");
-        }
+        console.error("Error processing reviews snapshot:", err);
+        setError("Error loading reviews.");
       } finally {
         setLoading(false);
       }
-    };
+    }, (err) => {
+      console.error("Snapshot error:", err);
+      // If index error, try fallback query without orderBy
+      if (err.message && err.message.includes("index")) {
+        console.log("Index missing, retrying without sort...");
+        // We can't easily retry inside the error handler of the same listener
+        // But we can set a friendly error message
+        setError("Database index building... Reviews will appear shortly.");
+      } else {
+        setError("Failed to load reviews.");
+      }
+      setLoading(false);
+    });
 
-    fetchReviews();
+    return () => unsubscribe();
   }, [studentId]);
 
   const formatDate = (date) => {

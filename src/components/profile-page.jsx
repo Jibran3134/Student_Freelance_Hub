@@ -17,7 +17,6 @@ const ADMIN_EMAILS = [
 ];
 
 export default function ProfilePage() {
-  const [user, setUser] = useState(null);
   const [profileData, setProfileData] = useState({
     name: "",
     email: "",
@@ -35,7 +34,7 @@ export default function ProfilePage() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchUserData = async (currentUser) => {
       setLoading(true);
       setError(null);
 
@@ -49,8 +48,6 @@ export default function ProfilePage() {
         targetUid = params.get("uid");
       }
 
-      const currentUser = auth.currentUser;
-
       // If no UID in URL, use current user
       if (!targetUid) {
         if (currentUser) {
@@ -63,8 +60,12 @@ export default function ProfilePage() {
       }
 
       setTargetUserId(targetUid);
-      setIsOwnProfile(currentUser && currentUser.uid === targetUid);
-      setIsAdmin(currentUser && ADMIN_EMAILS.includes(currentUser.email));
+
+      const isOwn = currentUser && currentUser.uid === targetUid;
+      const isUserAdmin = currentUser && ADMIN_EMAILS.includes(currentUser.email);
+
+      setIsOwnProfile(isOwn);
+      setIsAdmin(isUserAdmin);
 
       try {
         // Fetch User Data
@@ -90,7 +91,7 @@ export default function ProfilePage() {
             portfolioItems: portfolioItems,
             profilePicture: userData.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format"
           });
-        } else if (isAdmin && isOwnProfile) {
+        } else if (isUserAdmin && isOwn) {
           // If admin doesn't have a profile doc, just show default view
           // This allows admins to use the site without creating a student profile
           setProfileData({
@@ -115,8 +116,7 @@ export default function ProfilePage() {
     };
 
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      setUser(user);
-      fetchUserData();
+      fetchUserData(user);
     });
 
     return () => unsubscribe();
