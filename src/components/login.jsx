@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { auth, db, googleProvider } from "../firebase";
 import { signInWithEmailAndPassword, deleteUser, signInWithPopup } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { getRandomProfileImage } from "../constants";
 import "./styles/login.css";
 
 const ADMIN_EMAILS = [
@@ -91,7 +92,7 @@ export default function Login() {
           email: userCred.user.email,
           skills: [],
           education: "",
-          profilePicture: userCred.user.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
+          profilePicture: userCred.user.photoURL || getRandomProfileImage(),
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
@@ -136,7 +137,7 @@ export default function Login() {
           email: user.email,
           skills: [],
           education: "",
-          profilePicture: user.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
+          profilePicture: user.photoURL || getRandomProfileImage(),
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         });
