@@ -40,22 +40,13 @@ export default function StudentReviews({
     setError(null);
 
     const ratingsRef = collection(db, "ratings");
-    let q;
 
-    // Try with orderBy first
-    try {
-      q = query(
-        ratingsRef,
-        where("reviewedStudentId", "==", studentId),
-        orderBy("timestamp", "desc")
-      );
-    } catch (e) {
-      // Fallback if index issue (though query creation usually doesn't throw, execution does)
-      q = query(
-        ratingsRef,
-        where("reviewedStudentId", "==", studentId)
-      );
-    }
+    // Simple query without ordering to avoid index issues
+    // We will sort client-side
+    const q = query(
+      ratingsRef,
+      where("reviewedStudentId", "==", studentId)
+    );
 
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       try {
