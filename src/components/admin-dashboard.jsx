@@ -36,29 +36,49 @@ export default function AdminDashboard() {
       }
 
       setLoading(true);
+
+      // Initialize lists
+      let usersList = [];
+      let allPosts = [];
+      let disputesList = [];
+
       try {
         // 2. Fetch Users
-        const usersSnapshot = await getDocs(collection(db, "users"));
-        const usersList = usersSnapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(u => !u.deletedByAdmin); // Exclude deleted users
-
-        setUsers(usersList);
+        try {
+          const usersSnapshot = await getDocs(collection(db, "users"));
+          usersList = usersSnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(u => !u.deletedByAdmin); // Exclude deleted users
+          setUsers(usersList);
+        } catch (e) {
+          console.error("Error fetching users:", e);
+          alert(`Failed to load users: ${e.message}`);
+        }
 
         // 3. Fetch Posts (Projects & Services)
-        const projectsSnapshot = await getDocs(collection(db, "projects"));
-        const servicesSnapshot = await getDocs(collection(db, "services"));
+        try {
+          const projectsSnapshot = await getDocs(collection(db, "projects"));
+          const servicesSnapshot = await getDocs(collection(db, "services"));
 
-        const projects = projectsSnapshot.docs.map(doc => ({ id: doc.id, type: 'Project', ...doc.data() }));
-        const services = servicesSnapshot.docs.map(doc => ({ id: doc.id, type: 'Service', ...doc.data() }));
+          const projects = projectsSnapshot.docs.map(doc => ({ id: doc.id, type: 'Project', ...doc.data() }));
+          const services = servicesSnapshot.docs.map(doc => ({ id: doc.id, type: 'Service', ...doc.data() }));
 
-        const allPosts = [...projects, ...services];
-        setPosts(allPosts);
+          allPosts = [...projects, ...services];
+          setPosts(allPosts);
+        } catch (e) {
+          console.error("Error fetching posts:", e);
+          alert(`Failed to load posts: ${e.message}`);
+        }
 
         // 4. Fetch Disputes
-        const disputesSnapshot = await getDocs(collection(db, "disputes"));
-        const disputesList = disputesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setDisputes(disputesList);
+        try {
+          const disputesSnapshot = await getDocs(collection(db, "disputes"));
+          disputesList = disputesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setDisputes(disputesList);
+        } catch (e) {
+          console.error("Error fetching disputes:", e);
+          alert(`Failed to load disputes: ${e.message}`);
+        }
 
         // 5. Calculate Stats
         const now = new Date();
@@ -79,8 +99,7 @@ export default function AdminDashboard() {
         });
 
       } catch (error) {
-        console.error("Error fetching admin data:", error);
-        alert("Failed to load dashboard data.");
+        console.error("Error in dashboard:", error);
       } finally {
         setLoading(false);
       }

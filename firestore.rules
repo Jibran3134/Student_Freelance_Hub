@@ -12,6 +12,16 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Helper function to check if user is an admin
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email == "alishba11@gmail.com" ||
+        request.auth.token.email == "jibran22@gmail.com" ||
+        request.auth.token.email == "umar33@gmail.com" ||
+        request.auth.token.email == "abdullah44@gmail.com"
+      );
+    }
+
     // Users collection
     match /users/{userId} {
       allow read: if true;
@@ -97,9 +107,10 @@ service cloud.firestore {
 
     // Disputes
     match /disputes/{disputeId} {
-      allow read: if isAuthenticated() && (resource.data.senderId == request.auth.uid || resource.data.receiverId == request.auth.uid);
+      allow read, list: if isAuthenticated() && (isAdmin() || resource.data.senderId == request.auth.uid || resource.data.receiverId == request.auth.uid);
       allow create: if isAuthenticated();
-      allow update: if isAuthenticated(); // Allow updates for status changes
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated() && isAdmin();
     }
 
     // Saved Cards
