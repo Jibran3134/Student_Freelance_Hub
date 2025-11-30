@@ -6,10 +6,12 @@ import {
   where,
   onSnapshot,
   doc,
+  deleteDoc,
 } from "firebase/firestore";
 import { auth, db } from "../../firebase";
 import { addCredits, getWalletBalance } from "../../backend/wallet";
 import { saveCard, getSavedCards } from "../../backend/cards";
+import { releasePayment } from "../../backend/payments";
 import WithdrawRequest from "./WithdrawRequest";
 import WithdrawHistory from "./WithdrawHistory";
 import "../../styles/wallet.css";
@@ -35,6 +37,40 @@ export default function WalletPage() {
   const [useNewCard, setUseNewCard] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [cardErrors, setCardErrors] = useState({});
+
+  const [walletTab, setWalletTab] = useState("topup"); // NEW: tab state
+
+  // Custom confirmation modal
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("");
+  const [confirmModalResolver, setConfirmModalResolver] = useState(null);
+
+  // Custom confirm function that returns a promise
+  const customConfirm = (message) => {
+    return new Promise((resolve) => {
+      setConfirmMessage(message);
+      setShowConfirmModal(true);
+      setConfirmModalResolver(() => resolve);
+    });
+  };
+
+  const handleConfirmModalYes = () => {
+    if (confirmModalResolver) {
+      confirmModalResolver(true);
+    }
+    setShowConfirmModal(false);
+    setConfirmMessage("");
+    setConfirmModalResolver(null);
+  };
+
+  const handleConfirmModalNo = () => {
+    if (confirmModalResolver) {
+      confirmModalResolver(false);
+    }
+    setShowConfirmModal(false);
+    setConfirmMessage("");
+    setConfirmModalResolver(null);
+  };
 
   useEffect(() => {
     let walletUnsubscribe;
@@ -124,9 +160,10 @@ export default function WalletPage() {
   };
 
   const subscribeToPayments = (userId) => {
+    // Get payments where user is the owner (client receiving completed work)
     const paymentsQuery = query(
       collection(db, "requests"),
-      where("requesterId", "==", userId),
+      where("ownerId", "==", userId),
       where("status", "==", "completed")
     );
     return onSnapshot(paymentsQuery, (snapshot) => {
@@ -387,202 +424,224 @@ export default function WalletPage() {
               Use your credits to hire freelancers or receive payments.
             </p>
           </div>
-          <div className="wallet-card">
-            <h3>Add Credits</h3>
-            <form className="wallet-form" onSubmit={handleAddCredits}>
-              <div>
-                <label className="wallet-label">Amount (USD)</label>
-                <input
-                  type="number"
-                  min="1"
-                  step="0.01"
-                  value={topUpAmount}
-                  onChange={(event) => setTopUpAmount(event.target.value)}
-                  className="wallet-input"
-                  placeholder="Enter amount"
-                  required
-                />
-              </div>
 
-              {savedCards.length > 0 && (
-                <div>
-                  <label className="wallet-label">Payment Method</label>
-                  <div className="card-option-group">
-                    <label className="card-option">
-                      <input
-                        type="radio"
-                        name="cardOption"
-                        checked={!useNewCard}
-                        onChange={() => setUseNewCard(false)}
-                      />
-                      <span>Use Saved Card</span>
-                    </label>
-                    <label className="card-option">
-                      <input
-                        type="radio"
-                        name="cardOption"
-                        checked={useNewCard}
-                        onChange={() => setUseNewCard(true)}
-                      />
-                      <span>Use New Card</span>
-                    </label>
-                  </div>
-                </div>
-              )}
-
-              {!useNewCard && savedCards.length > 0 && (
-                <div>
-                  <label className="wallet-label">Select Card</label>
-                  <select
-                    className="wallet-input"
-                    value={selectedSavedCard}
-                    onChange={(e) => setSelectedSavedCard(e.target.value)}
-                  >
-                    {savedCards.map((card) => (
-                      <option key={card.id} value={card.id}>
-                        {card.maskedNumber} - Expires {card.expiryMonth}/{card.expiryYear.slice(-2)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {useNewCard && (
-                <>
-                  <div>
-                    <label className="wallet-label">Cardholder Name</label>
-                    <input
-                      type="text"
-                      value={cardholderName}
-                      onChange={(e) => setCardholderName(e.target.value)}
-                      className={`wallet-input ${cardErrors.cardholderName ? "input-error" : ""}`}
-                      placeholder="Name on card"
-                      required
-                    />
-                    {cardErrors.cardholderName && (
-                      <span className="error-text">{cardErrors.cardholderName}</span>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="wallet-label">Card Number</label>
-                    <input
-                      type="text"
-                      value={cardNumber}
-                      onChange={handleCardNumberChange}
-                      className={`wallet-input ${cardErrors.cardNumber ? "input-error" : ""}`}
-                      placeholder="1234 5678 9012 3456"
-                      maxLength="19"
-                      required
-                    />
-                    {cardErrors.cardNumber && (
-                      <span className="error-text">{cardErrors.cardNumber}</span>
-                    )}
-                  </div>
-
-                  <div className="card-row">
-                    <div className="card-col">
-                      <label className="wallet-label">Expiry Date</label>
-                      <input
-                        type="text"
-                        value={cardExpiry}
-                        onChange={handleExpiryChange}
-                        className={`wallet-input ${cardErrors.expiry ? "input-error" : ""}`}
-                        placeholder="MM/YY"
-                        maxLength="5"
-                        required
-                      />
-                      {cardErrors.expiry && (
-                        <span className="error-text">{cardErrors.expiry}</span>
-                      )}
-                    </div>
-                    <div className="card-col">
-                      <label className="wallet-label">CVC</label>
-                      <input
-                        type="text"
-                        value={cardCVC}
-                        onChange={handleCVCChange}
-                        className={`wallet-input ${cardErrors.cvc ? "input-error" : ""}`}
-                        placeholder="123"
-                        maxLength="4"
-                        required
-                      />
-                      {cardErrors.cvc && (
-                        <span className="error-text">{cardErrors.cvc}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <label className="save-card-option">
-                    <input
-                      type="checkbox"
-                      checked={saveCardForLater}
-                      onChange={(e) => setSaveCardForLater(e.target.checked)}
-                    />
-                    <span>Save this card for future payments</span>
-                  </label>
-                </>
-              )}
-
+          {/* WALLET TAB SELECTOR */}
+          <div className="wallet-card wallet-action-tabs">
+            <div className="tab-toggle-group">
               <button
-                className="primary-btn"
-                type="submit"
-                disabled={processing || !topUpAmount}
+                className={`tab-toggle-btn ${walletTab === "topup" ? "active" : ""}`}
+                onClick={() => setWalletTab("topup")}
               >
-                {processing ? "Processing..." : "Continue to Payment"}
+                Top Up
               </button>
-              {status.message && (
-                <div className={`wallet-status ${status.type}`}>
-                  {status.message}
-                </div>
-              )}
-            </form>
+              <button
+                className={`tab-toggle-btn ${walletTab === "withdraw" ? "active" : ""}`}
+                onClick={() => setWalletTab("withdraw")}
+              >
+                Withdraw
+              </button>
+            </div>
 
-            {showConfirmation && (
-              <div className="confirmation-overlay">
-                <div className="confirmation-modal">
-                  <h3>Confirm Payment</h3>
-                  <div className="confirmation-details">
-                    <p><strong>Amount:</strong> {formatCurrency(topUpAmount)}</p>
-                    {useNewCard ? (
-                      <>
-                        <p><strong>Card:</strong> **** **** **** {cardNumber.replace(/\s/g, "").slice(-4)}</p>
-                        <p><strong>Cardholder:</strong> {cardholderName}</p>
-                      </>
-                    ) : (
-                      savedCards.find((c) => c.id === selectedSavedCard) && (
-                        <p><strong>Card:</strong> {savedCards.find((c) => c.id === selectedSavedCard).maskedNumber}</p>
-                      )
+            {/* SHOW ONLY SELECTED TAB CONTENT */}
+            <div className="wallet-tab-content">
+              {walletTab === "topup" && (
+                <div>
+                  <h3>Add Credits</h3>
+                  <form className="wallet-form" onSubmit={handleAddCredits}>
+                    <div>
+                      <label className="wallet-label">Amount (USD)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        step="0.01"
+                        value={topUpAmount}
+                        onChange={(event) => setTopUpAmount(event.target.value)}
+                        className="wallet-input"
+                        placeholder="Enter amount"
+                        required
+                      />
+                    </div>
+
+                    {savedCards.length > 0 && (
+                      <div>
+                        <label className="wallet-label">Payment Method</label>
+                        <div className="card-option-group">
+                          <label className="card-option">
+                            <input
+                              type="radio"
+                              name="cardOption"
+                              checked={!useNewCard}
+                              onChange={() => setUseNewCard(false)}
+                            />
+                            <span>Use Saved Card</span>
+                          </label>
+                          <label className="card-option">
+                            <input
+                              type="radio"
+                              name="cardOption"
+                              checked={useNewCard}
+                              onChange={() => setUseNewCard(true)}
+                            />
+                            <span>Use New Card</span>
+                          </label>
+                        </div>
+                      </div>
                     )}
-                  </div>
-                  <div className="confirmation-actions">
-                    <button
-                      className="secondary-btn"
-                      onClick={cancelTopUp}
-                      disabled={processing}
-                    >
-                      Cancel
-                    </button>
+
+                    {!useNewCard && savedCards.length > 0 && (
+                      <div>
+                        <label className="wallet-label">Select Card</label>
+                        <select
+                          className="wallet-input"
+                          value={selectedSavedCard}
+                          onChange={(e) => setSelectedSavedCard(e.target.value)}
+                        >
+                          {savedCards.map((card) => (
+                            <option key={card.id} value={card.id}>
+                              {card.maskedNumber} - Expires {card.expiryMonth}/{card.expiryYear.slice(-2)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {useNewCard && (
+                      <>
+                        <div>
+                          <label className="wallet-label">Cardholder Name</label>
+                          <input
+                            type="text"
+                            value={cardholderName}
+                            onChange={(e) => setCardholderName(e.target.value)}
+                            className={`wallet-input ${cardErrors.cardholderName ? "input-error" : ""}`}
+                            placeholder="Name on card"
+                            required
+                          />
+                          {cardErrors.cardholderName && (
+                            <span className="error-text">{cardErrors.cardholderName}</span>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="wallet-label">Card Number</label>
+                          <input
+                            type="text"
+                            value={cardNumber}
+                            onChange={handleCardNumberChange}
+                            className={`wallet-input ${cardErrors.cardNumber ? "input-error" : ""}`}
+                            placeholder="1234 5678 9012 3456"
+                            maxLength="19"
+                            required
+                          />
+                          {cardErrors.cardNumber && (
+                            <span className="error-text">{cardErrors.cardNumber}</span>
+                          )}
+                        </div>
+
+                        <div className="card-row">
+                          <div className="card-col">
+                            <label className="wallet-label">Expiry Date</label>
+                            <input
+                              type="text"
+                              value={cardExpiry}
+                              onChange={handleExpiryChange}
+                              className={`wallet-input ${cardErrors.expiry ? "input-error" : ""}`}
+                              placeholder="MM/YY"
+                              maxLength="5"
+                              required
+                            />
+                            {cardErrors.expiry && (
+                              <span className="error-text">{cardErrors.expiry}</span>
+                            )}
+                          </div>
+                          <div className="card-col">
+                            <label className="wallet-label">CVC</label>
+                            <input
+                              type="text"
+                              value={cardCVC}
+                              onChange={handleCVCChange}
+                              className={`wallet-input ${cardErrors.cvc ? "input-error" : ""}`}
+                              placeholder="123"
+                              maxLength="4"
+                              required
+                            />
+                            {cardErrors.cvc && (
+                              <span className="error-text">{cardErrors.cvc}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <label className="save-card-option">
+                          <input
+                            type="checkbox"
+                            checked={saveCardForLater}
+                            onChange={(e) => setSaveCardForLater(e.target.checked)}
+                          />
+                          <span>Save this card for future payments</span>
+                        </label>
+                      </>
+                    )}
+
                     <button
                       className="primary-btn"
-                      onClick={confirmTopUp}
-                      disabled={processing}
+                      type="submit"
+                      disabled={processing || !topUpAmount}
                     >
-                      {processing ? "Processing..." : "Confirm Payment"}
+                      {processing ? "Processing..." : "Continue to Payment"}
                     </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+                    {status.message && (
+                      <div className={`wallet-status ${status.type}`}>
+                        {status.message}
+                      </div>
+                    )}
+                  </form>
 
-        <div className="wallet-grid">
-          <WithdrawRequest
-            userId={user.uid}
-            balance={balance}
-          />
-          <WithdrawHistory userId={user.uid} />
+                  {showConfirmation && (
+                    <div className="confirmation-overlay">
+                      <div className="confirmation-modal">
+                        <h3>Confirm Payment</h3>
+                        <div className="confirmation-details">
+                          <p><strong>Amount:</strong> {formatCurrency(topUpAmount)}</p>
+                          {useNewCard ? (
+                            <>
+                              <p><strong>Card:</strong> **** **** **** {cardNumber.replace(/\s/g, "").slice(-4)}</p>
+                              <p><strong>Cardholder:</strong> {cardholderName}</p>
+                            </>
+                          ) : (
+                            savedCards.find((c) => c.id === selectedSavedCard) && (
+                              <p><strong>Card:</strong> {savedCards.find((c) => c.id === selectedSavedCard).maskedNumber}</p>
+                            )
+                          )}
+                        </div>
+                        <div className="confirmation-actions">
+                          <button
+                            className="secondary-btn"
+                            onClick={cancelTopUp}
+                            disabled={processing}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="primary-btn"
+                            onClick={confirmTopUp}
+                            disabled={processing}
+                          >
+                            {processing ? "Processing..." : "Confirm Payment"}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {walletTab === "withdraw" && (
+                <div>
+                  <WithdrawRequest userId={user.uid} balance={balance} />
+                  <WithdrawHistory userId={user.uid} />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Pending Payments Section */}
@@ -595,19 +654,59 @@ export default function WalletPage() {
           ) : (
             <div className="transaction-list">
               {pendingPayments.map((payment) => (
-                <div key={payment.id} className="transaction-item">
-                  <div className="transaction-meta">
-                    <span className="transaction-type">Pending Payment</span>
+                <div key={payment.id} className="wallet-card" style={{ marginBottom: '1rem', padding: '1.5rem' }}>
+                  <div className="transaction-meta" style={{ marginBottom: '1rem' }}>
+                    <span className="transaction-type">Completed Work Awaiting Payment</span>
                     <span className="transaction-description">
-                      {payment.projectTitle} ({payment.projectType})
+                      <strong>{payment.projectTitle}</strong> ({payment.projectType})
+                    </span>
+                    <span className="transaction-date">
+                      Submitted by: {payment.requesterName || 'Freelancer'}
                     </span>
                     <span className="transaction-date">
                       Turned in: {formatTimestamp(payment.completedAt)}
                     </span>
+                    <div style={{ marginTop: '0.5rem', fontSize: '1.2rem', fontWeight: 'bold', color: '#4CAF50' }}>
+                      Amount: {formatCurrency(payment.amount || 0)}
+                    </div>
                   </div>
-                  <div className="transaction-amount positive">
-                    Pending Release
-                  </div>
+                  <button
+                    className="primary-btn"
+                    onClick={async () => {
+                      if (!await customConfirm(
+                        `Release payment of ${formatCurrency(payment.amount || 0)} to ${payment.requesterName}?`
+                      )) return;
+
+                      try {
+                        setProcessing(true);
+                        await releasePayment(
+                          payment.projectId || payment.id,
+                          user.uid,
+                          payment.requesterId,
+                          payment.amount || 0
+                        );
+
+                        // Delete the request after payment is released
+                        await deleteDoc(doc(db, "requests", payment.id));
+
+                        setStatus({
+                          type: 'success',
+                          message: 'Payment released successfully!'
+                        });
+                      } catch (error) {
+                        console.error('Error releasing payment:', error);
+                        setStatus({
+                          type: 'error',
+                          message: error.message || 'Failed to release payment'
+                        });
+                      } finally {
+                        setProcessing(false);
+                      }
+                    }}
+                    disabled={processing}
+                  >
+                    {processing ? 'Processing...' : 'Release Payment'}
+                  </button>
                 </div>
               ))}
             </div>
@@ -656,6 +755,24 @@ export default function WalletPage() {
           )}
         </div>
       </div>
+
+      {/* Custom Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3 className="modal-title">⚠️ Confirm Action</h3>
+            <p className="modal-description">{confirmMessage}</p>
+            <div className="modal-actions">
+              <button className="modal-btn modal-btn-cancel" onClick={handleConfirmModalNo}>
+                No
+              </button>
+              <button className="modal-btn modal-btn-confirm" onClick={handleConfirmModalYes}>
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

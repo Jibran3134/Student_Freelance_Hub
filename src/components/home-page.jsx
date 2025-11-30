@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, query, where, onSnapshot, deleteDoc, doc, updateDoc, addDoc, serverTimestamp, orderBy } from "firebase/firestore";
+import { collection, query, where, onSnapshot, deleteDoc, doc, updateDoc, addDoc, serverTimestamp, orderBy, getDoc } from "firebase/firestore";
 import "./styles/home-page.css";
 
 export default function HomePage() {
@@ -18,6 +18,70 @@ export default function HomePage() {
 
   const [notifications, setNotifications] = useState([]);
   const [loadingNotifications, setLoadingNotifications] = useState(true);
+
+  // Custom modal for payment amount input
+  const [showAmountModal, setShowAmountModal] = useState(false);
+  const [amountInput, setAmountInput] = useState("");
+  const [amountModalResolver, setAmountModalResolver] = useState(null);
+
+  // Custom confirmation modal
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmMessage, setConfirmMessage] = useState("");
+  const [confirmModalResolver, setConfirmModalResolver] = useState(null);
+
+  // Custom prompt function that returns a promise
+  const customPrompt = (message) => {
+    return new Promise((resolve) => {
+      setShowAmountModal(true);
+      setAmountInput("");
+      setAmountModalResolver(() => resolve);
+    });
+  };
+
+  // Custom confirm function that returns a promise
+  const customConfirm = (message) => {
+    return new Promise((resolve) => {
+      setConfirmMessage(message);
+      setShowConfirmModal(true);
+      setConfirmModalResolver(() => resolve);
+    });
+  };
+
+  const handleAmountModalConfirm = () => {
+    if (amountModalResolver) {
+      amountModalResolver(amountInput);
+    }
+    setShowAmountModal(false);
+    setAmountInput("");
+    setAmountModalResolver(null);
+  };
+
+  const handleAmountModalCancel = () => {
+    if (amountModalResolver) {
+      amountModalResolver(null);
+    }
+    setShowAmountModal(false);
+    setAmountInput("");
+    setAmountModalResolver(null);
+  };
+
+  const handleConfirmModalYes = () => {
+    if (confirmModalResolver) {
+      confirmModalResolver(true);
+    }
+    setShowConfirmModal(false);
+    setConfirmMessage("");
+    setConfirmModalResolver(null);
+  };
+
+  const handleConfirmModalNo = () => {
+    if (confirmModalResolver) {
+      confirmModalResolver(false);
+    }
+    setShowConfirmModal(false);
+    setConfirmMessage("");
+    setConfirmModalResolver(null);
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -139,20 +203,32 @@ export default function HomePage() {
 
   const handleAcceptRequest = async (requestId, request) => {
     try {
+      // Get project/service details to capture budget
+      let budget = 0;
+      const collectionName = request.itemType === 'Project' ? 'projects' : 'services';
+      const projectDoc = await getDoc(doc(db, collectionName, request.itemId));
+
+      if (projectDoc.exists()) {
+        const projectData = projectDoc.data();
+        // Use budgetMax if available, otherwise budgetMin, otherwise price
+        budget = Number(projectData.budgetMax || projectData.budgetMin || projectData.price || 0);
+      }
+
       // Create enrolled project for the requester
       await addDoc(collection(db, "enrolledProjects"), {
         workerId: request.userId, // Person who sent the request
         workerName: request.userName,
         ownerId: currentUser.uid, // Person who posted the project
         ownerName: currentUser.displayName || currentUser.email?.split("@")[0] || "Project Owner",
-        ownerPhone: currentUser.phoneNumber || "+92 300 0000000", // TODO: Get from user profile
+        ownerPhone: currentUser.phoneNumber || "+92 300 0000000",
         projectId: request.itemId,
         title: request.title,
         category: request.category,
         itemType: request.itemType,
+        budget: budget, // Store the budget amount
         status: "in-progress",
         progress: 0,
-        deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
+        deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         createdAt: serverTimestamp(),
       });
 
@@ -197,9 +273,95 @@ export default function HomePage() {
     }
   };
 
-  const handleTurnIn = (projectId) => {
-    // TODO: Implement turn in functionality
-    alert(`Turn in functionality for project ${projectId} will be implemented in backend`);
+  const handleTurnIn = async (projectId) => {
+    try {
+      const project = enrolledProjects.find(p => p.id === projectId);
+      if (!project) return;
+
+      let budget = project.budget;
+
+      // If budget is missing, try to fetch it from the original project/service
+      if (!budget || budget <= 0) {
+        try {
+          const collectionName = project.itemType === 'Project' ? 'projects' : 'services';
+          // Use projectId if available, otherwise fallback might fail but worth a try
+          const originalId = project.projectId;
+
+          if (originalId) {
+            const originalDoc = await getDoc(doc(db, collectionName, originalId));
+            if (originalDoc.exists()) {
+              const data = originalDoc.data();
+              budget = Number(data.budgetMax || data.budgetMin || data.price || 0);
+
+              // Update the enrolled project so we don't have to fetch again
+              if (budget > 0) {
+                await updateDoc(doc(db, "enrolledProjects", projectId), {
+                  budget: budget
+                });
+              }
+            }
+          }
+        } catch (fetchErr) {
+          console.error("Error fetching original budget:", fetchErr);
+        }
+      }
+
+      // Check if budget is still invalid
+      if (!budget || budget <= 0) {
+        // Fallback: Ask user to enter amount (as a last resort for old data)
+        const manualAmount = await customPrompt("Payment amount not found. Please enter the agreed amount for this project:");
+        if (manualAmount && !isNaN(manualAmount) && Number(manualAmount) > 0) {
+          budget = Number(manualAmount);
+          // Save it
+          await updateDoc(doc(db, "enrolledProjects", projectId), {
+            budget: budget
+          });
+        } else {
+          alert("Cannot turn in work: No valid payment amount available.");
+          return;
+        }
+      }
+
+      if (!await customConfirm(`Turn in work and request payment of $${budget}?`)) {
+        return;
+      }
+
+      // 1. Update enrolled project status
+      await updateDoc(doc(db, "enrolledProjects", projectId), {
+        status: "turned-in",
+        progress: 100,
+        completedAt: serverTimestamp()
+      });
+
+      // 2. Create Payment Request (for Wallet "Pending Payments")
+      await addDoc(collection(db, "requests"), {
+        requesterId: currentUser.uid,
+        requesterName: userName,
+        ownerId: project.ownerId,
+        projectId: project.projectId || projectId,
+        projectTitle: project.title,
+        projectType: project.itemType || "Project",
+        status: "completed",
+        amount: budget,
+        completedAt: serverTimestamp(),
+        createdAt: serverTimestamp()
+      });
+
+      // 3. Notify Project Owner
+      await addDoc(collection(db, "notifications"), {
+        userId: project.ownerId,
+        message: `${userName} has turned in work for "${project.title}". Payment of $${budget} is pending your approval.`,
+        type: "info",
+        createdAt: serverTimestamp(),
+        read: false,
+        link: "/wallet"
+      });
+
+      alert(`Work turned in successfully! Payment request of $${budget} sent to client.`);
+    } catch (error) {
+      console.error("Error turning in work:", error);
+      alert("Failed to turn in work: " + error.message);
+    }
   };
 
   const handleWhatsAppContact = (phoneOrUserId, projectTitle) => {
@@ -440,6 +602,55 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      {/* Custom Amount Input Modal */}
+      {showAmountModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3 className="modal-title">💰 Enter Payment Amount</h3>
+            <p className="modal-description">Payment amount not found. Please enter the agreed amount for this project:</p>
+            <input
+              type="number"
+              className="modal-input"
+              placeholder="Enter amount (e.g., 500)"
+              value={amountInput}
+              onChange={(e) => setAmountInput(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleAmountModalConfirm();
+                }
+              }}
+              autoFocus
+            />
+            <div className="modal-actions">
+              <button className="modal-btn modal-btn-cancel" onClick={handleAmountModalCancel}>
+                Cancel
+              </button>
+              <button className="modal-btn modal-btn-confirm" onClick={handleAmountModalConfirm}>
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3 className="modal-title">⚠️ Confirm Action</h3>
+            <p className="modal-description">{confirmMessage}</p>
+            <div className="modal-actions">
+              <button className="modal-btn modal-btn-cancel" onClick={handleConfirmModalNo}>
+                No
+              </button>
+              <button className="modal-btn modal-btn-confirm" onClick={handleConfirmModalYes}>
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
