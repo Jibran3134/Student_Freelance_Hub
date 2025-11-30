@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import { collection, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import styles from "./styles/admin-dashboard.module.css";
-import AdminDisputes from "./admin/AdminDisputes";
 
 const ADMIN_EMAILS = [
   "alishba11@gmail.com",
@@ -194,12 +193,6 @@ export default function AdminDashboard() {
           >
             Manage Posts
           </button>
-          <button
-            className={`${styles.tab} ${activeTab === "disputes" ? styles.tabActive : ""}`}
-            onClick={() => setActiveTab("disputes")}
-          >
-            Disputes
-          </button>
         </div>
 
         {activeTab === "users" && (
@@ -294,12 +287,6 @@ export default function AdminDashboard() {
                 </tbody>
               </table>
             </div>
-          </div>
-        )}
-
-        {activeTab === "disputes" && (
-          <div className={styles.card}>
-            <AdminDisputes />
           </div>
         )}
 
