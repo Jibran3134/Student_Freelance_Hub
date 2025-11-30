@@ -58,6 +58,10 @@ function App() {
       return <RequestApproval />;
     }
 
+    if (route.startsWith("#/profile")) {
+      return <ProfilePage />;
+    }
+
     switch (route) {
       case "#/home":
         return <HomePage />;
