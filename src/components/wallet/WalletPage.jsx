@@ -303,9 +303,18 @@ export default function WalletPage() {
       const cards = await getSavedCards(user.uid);
       setSavedCards(cards);
     } catch (error) {
+      console.error("Wallet Error:", error);
+      let errorMessage = "Failed to add credits.";
+
+      if (error.code === "permission-denied") {
+        errorMessage = "Permission denied. Please check your wallet settings or contact support.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       setStatus({
         type: "error",
-        message: error.message || "Failed to add credits.",
+        message: errorMessage,
       });
     } finally {
       setProcessing(false);
@@ -630,9 +639,9 @@ export default function WalletPage() {
                   </div>
                   <div
                     className={`transaction-amount ${transaction.type === "credit" ||
-                        transaction.receiverId === user.uid
-                        ? "positive"
-                        : "negative"
+                      transaction.receiverId === user.uid
+                      ? "positive"
+                      : "negative"
                       }`}
                   >
                     {transaction.type === "credit" ||

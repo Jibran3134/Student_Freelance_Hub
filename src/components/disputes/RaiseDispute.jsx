@@ -83,9 +83,18 @@ export default function RaiseDispute({
       setStatus({ type: "success", message: "Dispute submitted successfully." });
       onSubmitted?.();
     } catch (error) {
+      console.error("Dispute Error:", error);
+      let errorMessage = "Unable to raise dispute.";
+
+      if (error.code === "permission-denied") {
+        errorMessage = "Permission denied. Please ensure you are logged in and authorized.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       setStatus({
         type: "error",
-        message: error.message || "Unable to raise dispute.",
+        message: errorMessage,
       });
     } finally {
       setSubmitting(false);
@@ -105,9 +114,8 @@ export default function RaiseDispute({
             <label htmlFor="dispute-job-id">Job ID</label>
             <input
               id="dispute-job-id"
-              className={`dispute-input ${
-                errors.jobId ? "input-error" : ""
-              }`}
+              className={`dispute-input ${errors.jobId ? "input-error" : ""
+                }`}
               value={jobIdInput}
               onChange={(event) => setJobIdInput(event.target.value)}
               placeholder="Enter job reference"
@@ -123,9 +131,8 @@ export default function RaiseDispute({
             </label>
             <input
               id="dispute-receiver-id"
-              className={`dispute-input ${
-                errors.receiverId ? "input-error" : ""
-              }`}
+              className={`dispute-input ${errors.receiverId ? "input-error" : ""
+                }`}
               value={receiverIdInput}
               onChange={(event) => setReceiverIdInput(event.target.value)}
               placeholder="Enter the other party's user ID"
@@ -144,9 +151,8 @@ export default function RaiseDispute({
               min="1"
               step="0.01"
               id="dispute-amount"
-              className={`dispute-input ${
-                errors.amount ? "input-error" : ""
-              }`}
+              className={`dispute-input ${errors.amount ? "input-error" : ""
+                }`}
               value={amountInput}
               onChange={(event) => setAmountInput(event.target.value)}
               placeholder="Amount in dispute"
@@ -174,9 +180,8 @@ export default function RaiseDispute({
         <label htmlFor="dispute-description">Description</label>
         <textarea
           id="dispute-description"
-          className={`dispute-textarea ${
-            errors.explanation ? "input-error" : ""
-          }`}
+          className={`dispute-textarea ${errors.explanation ? "input-error" : ""
+            }`}
           placeholder="Describe the issue in detail..."
           value={explanation}
           onChange={(event) => setExplanation(event.target.value)}

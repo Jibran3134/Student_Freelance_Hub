@@ -13,17 +13,12 @@ service cloud.firestore {
     }
 
     // Users collection
-    // - Public read (for profiles)
-    // - Owner write (create/update own profile)
     match /users/{userId} {
       allow read: if true;
       allow write: if isOwner(userId);
     }
 
     // Projects and Services
-    // - Public read
-    // - Authenticated create
-    // - Owner update/delete (assuming 'ownerId' or 'userId' field exists)
     match /projects/{projectId} {
       allow read: if true;
       allow create: if isAuthenticated();
@@ -43,8 +38,6 @@ service cloud.firestore {
     }
 
     // Portfolio
-    // - Public read
-    // - Owner write
     match /portfolio/{itemId} {
       allow read: if true;
       allow create: if isAuthenticated();
@@ -52,17 +45,12 @@ service cloud.firestore {
     }
 
     // Ratings
-    // - Public read
-    // - Authenticated write
     match /ratings/{ratingId} {
       allow read: if true;
       allow write: if isAuthenticated();
     }
 
     // Notifications
-    // - Owner read
-    // - Authenticated create (to send notification)
-    // - Owner update (mark as read)
     match /notifications/{notificationId} {
       allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
       allow create: if isAuthenticated();
@@ -70,13 +58,12 @@ service cloud.firestore {
     }
 
     // Bookmarks, SentRequests, EnrolledProjects
-    // - Owner read/write
     match /bookmarks/{itemId} {
       allow read, write: if isAuthenticated() && (resource.data.userId == request.auth.uid || request.resource.data.userId == request.auth.uid);
     }
     
     match /sentRequests/{requestId} {
-      allow read, write: if isAuthenticated(); // Simplified for now as it involves two parties
+      allow read, write: if isAuthenticated();
     }
     
     match /enrolledProjects/{itemId} {
@@ -84,14 +71,14 @@ service cloud.firestore {
     }
 
     // Wallet & Transactions
-    // - Owner read/write
     match /wallets/{userId} {
       allow read, write: if isOwner(userId);
     }
     
     match /transactions/{txnId} {
       allow read: if isAuthenticated();
-      allow write: if false; // Only backend should write ideally, but for now block client write if not needed
+      allow create: if isAuthenticated(); // Allow client-side creation for now
+      allow update, delete: if false; // Transactions should be immutable
     }
     
     match /withdraw_requests/{requestId} {
@@ -104,6 +91,18 @@ service cloud.firestore {
     
     match /requests/{requestId} {
       allow read, write: if isAuthenticated();
+    }
+
+    // Disputes
+    match /disputes/{disputeId} {
+      allow read: if isAuthenticated() && (resource.data.senderId == request.auth.uid || resource.data.receiverId == request.auth.uid);
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated(); // Allow updates for status changes
+    }
+
+    // Saved Cards
+    match /savedCards/{cardId} {
+      allow read, write: if isAuthenticated() && (resource.data.userId == request.auth.uid || request.resource.data.userId == request.auth.uid);
     }
 
     // Default deny
