@@ -72,13 +72,15 @@ service cloud.firestore {
 
     // Wallet & Transactions
     match /wallets/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read, write: if isAuthenticated();
     }
     
     match /transactions/{txnId} {
       allow read: if isAuthenticated();
+
       allow create: if isAuthenticated(); // Allow client-side creation for now
       allow update, delete: if false; // Transactions should be immutable
+
     }
     
     match /withdraw_requests/{requestId} {

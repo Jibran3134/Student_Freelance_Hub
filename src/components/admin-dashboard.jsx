@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
-import { collection, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, deleteDoc, addDoc, serverTimestamp } from "firebase/firestore";
 import styles from "./styles/admin-dashboard.module.css";
 
 const ADMIN_EMAILS = [
@@ -14,6 +14,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("users");
   const [users, setUsers] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [disputes, setDisputes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [reports, setReports] = useState({
     totalUsers: 0,
@@ -54,7 +55,12 @@ export default function AdminDashboard() {
         const allPosts = [...projects, ...services];
         setPosts(allPosts);
 
-        // 4. Calculate Stats
+        // 4. Fetch Disputes
+        const disputesSnapshot = await getDocs(collection(db, "disputes"));
+        const disputesList = disputesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setDisputes(disputesList);
+
+        // 5. Calculate Stats
         const now = new Date();
         const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -141,6 +147,36 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleResolveDispute = async (disputeId) => {
+    if (!window.confirm("Resolve this dispute? It will be removed from the list.")) return;
+    try {
+      await deleteDoc(doc(db, "disputes", disputeId));
+      setDisputes(prev => prev.filter(d => d.id !== disputeId));
+      alert("Dispute resolved.");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to resolve dispute.");
+    }
+  };
+
+  const handleWarnUser = async (userId) => {
+    const msg = prompt("Enter warning message:", "You have been reported for misconduct. Please adhere to community guidelines.");
+    if (!msg) return;
+    try {
+      await addDoc(collection(db, "notifications"), {
+        userId,
+        message: `WARNING from Admin: ${msg}`,
+        type: "error",
+        createdAt: serverTimestamp(),
+        read: false
+      });
+      alert("Warning sent to user.");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to send warning.");
+    }
+  };
+
   if (loading) {
     return (
       <div className={styles.page}>
@@ -192,6 +228,12 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab("posts")}
           >
             Manage Posts
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === "disputes" ? styles.tabActive : ""}`}
+            onClick={() => setActiveTab("disputes")}
+          >
+            Manage Disputes
           </button>
         </div>
 
@@ -282,6 +324,57 @@ export default function AdminDashboard() {
                   {posts.length === 0 && (
                     <tr>
                       <td colSpan="6" className={styles.td} style={{ textAlign: 'center' }}>No posts found.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "disputes" && (
+          <div className={styles.card}>
+            <h2 className={styles.sectionHeading}>Dispute Management</h2>
+            <div style={{ overflowX: 'auto' }}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th className={styles.th}>Job ID</th>
+                    <th className={styles.th}>Reason</th>
+                    <th className={styles.th}>Amount</th>
+                    <th className={styles.th}>Status</th>
+                    <th className={styles.th}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {disputes.map((dispute) => (
+                    <tr key={dispute.id}>
+                      <td className={styles.td}>{dispute.jobId || "N/A"}</td>
+                      <td className={styles.td}>{dispute.reason}</td>
+                      <td className={styles.td}>${dispute.amount}</td>
+                      <td className={styles.td}>
+                        <span className={`${styles.badge} ${styles.badgeInactive}`}>
+                          {dispute.status || "Open"}
+                        </span>
+                      </td>
+                      <td className={styles.td}>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button className={styles.button} onClick={() => handleResolveDispute(dispute.id)}>
+                            Resolve
+                          </button>
+                          <button className={styles.button} onClick={() => handleWarnUser(dispute.senderId)}>
+                            Warn Sender
+                          </button>
+                          <button className={styles.button} onClick={() => handleWarnUser(dispute.receiverId)}>
+                            Warn Receiver
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {disputes.length === 0 && (
+                    <tr>
+                      <td colSpan="5" className={styles.td} style={{ textAlign: 'center' }}>No disputes found.</td>
                     </tr>
                   )}
                 </tbody>
