@@ -86,7 +86,20 @@ export default function Register() {
       // Redirect to login
       window.location.hash = "#/login";
     } catch (error) {
-      setErrors({ submit: error.message });
+      console.error("Registration Error:", error);
+      let errorMessage = "Failed to register. Please try again.";
+
+      if (error.code === "auth/email-already-in-use") {
+        errorMessage = "Email already in use. Please login.";
+      } else if (error.code === "auth/weak-password") {
+        errorMessage = "Password is too weak.";
+      } else if (error.code === "permission-denied") {
+        errorMessage = "Account created, but profile setup failed. Please contact support or check database rules.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setErrors({ submit: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -121,7 +134,15 @@ export default function Register() {
       window.location.hash = "#/profile";
     } catch (error) {
       console.error("Social login error:", error);
-      setErrors({ submit: error.message });
+      let errorMessage = "Failed to login with Google.";
+
+      if (error.code === "permission-denied") {
+        errorMessage = "Login successful, but profile access failed. Please contact support or check database rules.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setErrors({ submit: errorMessage });
     } finally {
       setLoading(false);
     }

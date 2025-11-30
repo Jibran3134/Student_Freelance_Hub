@@ -100,7 +100,18 @@ export default function Login() {
         window.location.hash = "#/profile";
       }
     } catch (error) {
-      setErrors({ submit: error.message });
+      console.error("Login Error:", error);
+      let errorMessage = "Failed to login. Please try again.";
+
+      if (error.code === "auth/invalid-credential" || error.code === "auth/wrong-password" || error.code === "auth/user-not-found") {
+        errorMessage = "Incorrect email or password.";
+      } else if (error.code === "permission-denied") {
+        errorMessage = "Login successful, but profile access failed. Please contact support or check database rules.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setErrors({ submit: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -149,7 +160,15 @@ export default function Login() {
       window.location.hash = "#/profile";
     } catch (error) {
       console.error("Social login error:", error);
-      setErrors({ submit: error.message });
+      let errorMessage = "Failed to login with Google.";
+
+      if (error.code === "permission-denied") {
+        errorMessage = "Login successful, but profile access failed. Please contact support or check database rules.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setErrors({ submit: errorMessage });
     } finally {
       setLoading(false);
     }

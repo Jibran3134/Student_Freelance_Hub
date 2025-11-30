@@ -1,0 +1,114 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is accessing their own data
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Users collection
+    // - Public read (for profiles)
+    // - Owner write (create/update own profile)
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if isOwner(userId);
+    }
+
+    // Projects and Services
+    // - Public read
+    // - Authenticated create
+    // - Owner update/delete (assuming 'ownerId' or 'userId' field exists)
+    match /projects/{projectId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (resource.data.ownerId == request.auth.uid || resource.data.userId == request.auth.uid);
+    }
+    
+    match /services/{serviceId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (resource.data.ownerId == request.auth.uid || resource.data.userId == request.auth.uid);
+    }
+    
+    match /projectsServices/{itemId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (resource.data.ownerId == request.auth.uid || resource.data.userId == request.auth.uid);
+    }
+
+    // Portfolio
+    // - Public read
+    // - Owner write
+    match /portfolio/{itemId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (resource.data.userId == request.auth.uid);
+    }
+
+    // Ratings
+    // - Public read
+    // - Authenticated write
+    match /ratings/{ratingId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Notifications
+    // - Owner read
+    // - Authenticated create (to send notification)
+    // - Owner update (mark as read)
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Bookmarks, SentRequests, EnrolledProjects
+    // - Owner read/write
+    match /bookmarks/{itemId} {
+      allow read, write: if isAuthenticated() && (resource.data.userId == request.auth.uid || request.resource.data.userId == request.auth.uid);
+    }
+    
+    match /sentRequests/{requestId} {
+      allow read, write: if isAuthenticated(); // Simplified for now as it involves two parties
+    }
+    
+    match /enrolledProjects/{itemId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Wallet & Transactions
+    // - Owner read/write
+    match /wallets/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+    
+    match /transactions/{txnId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only backend should write ideally, but for now block client write if not needed
+    }
+    
+    match /withdraw_requests/{requestId} {
+      allow read, create: if isAuthenticated();
+    }
+    
+    match /payments/{paymentId} {
+      allow read: if isAuthenticated();
+    }
+    
+    match /requests/{requestId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
