@@ -1,8 +1,9 @@
 
 import React, { useState } from "react";
-import { auth, db } from "../firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { auth, db, googleProvider } from "../firebase";
+import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { getRandomProfileImage } from "../constants";
 import "./styles/register.css";
 
 export default function Register() {
@@ -26,38 +27,40 @@ export default function Register() {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
     }
-    
+
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email is invalid";
     }
-    
+
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
+    } else if (!/^[a-zA-Z0-9]+$/.test(formData.password)) {
+      newErrors.password = "Password must contain only letters and numbers";
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const registerUser = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setLoading(true);
     try {
       // Create user account
@@ -67,18 +70,18 @@ export default function Register() {
         formData.password
       );
       const user = userCredential.user;
-      
+
       // Create user profile in Firestore
       await setDoc(doc(db, "users", user.uid), {
         name: formData.name,
         email: formData.email,
         skills: [],
         education: "",
-        profilePicture: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
+        profilePicture: getRandomProfileImage(formData.name),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
-      
+
       console.log("Registered and profile created:", user.email);
       // Redirect to login
       window.location.hash = "#/login";
@@ -89,15 +92,45 @@ export default function Register() {
     }
   };
 
-  const handleSocialLogin = (provider) => {
-    // Placeholder for social login implementation
-    console.log(`Social login with ${provider}`);
+  const handleSocialLogin = async (providerName) => {
+    setLoading(true);
+    try {
+      const provider = googleProvider;
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Check if user profile exists
+      const docRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        // Create new profile
+        const userName = user.displayName || "User";
+        await setDoc(docRef, {
+          name: userName,
+          email: user.email,
+          skills: [],
+          education: "",
+          profilePicture: user.photoURL || getRandomProfileImage(userName),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+
+      console.log(`Social login success with ${providerName}`);
+      window.location.hash = "#/profile";
+    } catch (error) {
+      console.error("Social login error:", error);
+      setErrors({ submit: error.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="register-page">
       <div className="register-card">
-        <h1 className="register-title">Create Account</h1>
+        <h1 className="register-title">Signup</h1>
         <p className="register-subtitle">Join the Students Freelance Hub community</p>
 
         <div className="register-social-buttons">
@@ -126,21 +159,12 @@ export default function Register() {
             </svg>
             Google
           </button>
-          <button
-            type="button"
-            className="register-social-button"
-            onClick={() => handleSocialLogin("GitHub")}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-            </svg>
-            GitHub
-          </button>
+
         </div>
 
         <div className="register-divider">
           <div className="register-divider-line"></div>
-          <span className="register-divider-text">or sign up with email</span>
+          <span className="register-divider-text">or signup with email</span>
           <div className="register-divider-line"></div>
         </div>
 
@@ -220,7 +244,7 @@ export default function Register() {
             className="register-button"
             disabled={loading}
           >
-            {loading ? "Creating Account..." : "Sign Up"}
+            {loading ? "Creating Account..." : "Signup"}
           </button>
         </form>
 
@@ -230,7 +254,7 @@ export default function Register() {
             className="register-login-button"
             onClick={() => (window.location.hash = "#/login")}
           >
-            Sign In
+            Login
           </span>
         </div>
       </div>

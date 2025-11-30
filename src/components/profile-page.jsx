@@ -4,10 +4,10 @@ import { doc, getDoc, collection, query, where, getDocs } from "firebase/firesto
 import styles from "./styles/profile-page.module.css";
 import AverageRating from "./AverageRating";
 import StudentReviews from "./StudentReviews";
+import RateStudent from "./RateStudent";
 import PaymentsTable from "./PaymentsTable";
 
 export default function ProfilePage() {
-  const [user, setUser] = useState(null);
   const [profileData, setProfileData] = useState({
     name: "",
     email: "",
@@ -49,10 +49,38 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchUserData = async (currentUser) => {
-      if (!currentUser) {
-        setLoading(false);
-        return;
+
+      setLoading(true);
+      setError(null);
+
+      // Parse UID from URL hash (e.g., #/profile?uid=xyz)
+      const hash = window.location.hash;
+      const queryIndex = hash.indexOf("?");
+      let targetUid = null;
+
+      if (queryIndex !== -1) {
+        const params = new URLSearchParams(hash.substring(queryIndex));
+        targetUid = params.get("uid");
       }
+
+      // If no UID in URL, use current user
+      if (!targetUid) {
+        if (currentUser) {
+          targetUid = currentUser.uid;
+        } else {
+          // Not logged in and no target UID -> Login
+          window.location.hash = "#/login";
+          return;
+        }
+      }
+
+      setTargetUserId(targetUid);
+
+      const isOwn = currentUser && currentUser.uid === targetUid;
+      const isUserAdmin = currentUser && ADMIN_EMAILS.includes(currentUser.email);
+
+      setIsOwnProfile(isOwn);
+      setIsAdmin(isUserAdmin);
 
       try {
         // Fetch user profile from Firestore
@@ -70,7 +98,26 @@ export default function ProfilePage() {
             education: userData.education || "",
             profilePicture: userData.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
           }));
-          await loadListingsByEmail(derivedEmail);
+
+
+          setProfileData({
+            ...userData,
+            portfolioItems: portfolioItems,
+            profilePicture: userData.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format"
+          });
+        } else if (isUserAdmin && isOwn) {
+          // If admin doesn't have a profile doc, just show default view
+          // This allows admins to use the site without creating a student profile
+          setProfileData({
+            name: "Admin User",
+            email: currentUser.email,
+            skills: [],
+            education: "",
+            profilePicture: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
+            portfolioItems: [],
+            availability: "online",
+            visibility: "public"
+          });
         } else {
           // If profile doesn't exist, use email from auth
           setProfileData((prev) => ({
@@ -102,15 +149,9 @@ export default function ProfilePage() {
       }
     };
 
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        fetchUserData(currentUser);
-      } else {
-        setLoading(false);
-        // Redirect to login if not authenticated
-        window.location.hash = "#/login";
-      }
+
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      fetchUserData(user);
     });
 
     // Also fetch data when component mounts or route changes
@@ -293,6 +334,11 @@ export default function ProfilePage() {
               </div>
             )}
           </div>
+        )}
+
+        {/* Rate Student Section */}
+        {targetUserId && !isOwnProfile && (
+          <RateStudent studentId={targetUserId} />
         )}
 
         {/* Reviews Section */}

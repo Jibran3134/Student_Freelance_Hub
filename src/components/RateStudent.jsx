@@ -21,28 +21,27 @@ import {
  * - reviewerId: Optional - will use auth.currentUser.uid if not provided
  * - onRatingSubmitted: Optional callback function called after successful submission
  */
-export default function RateStudent({ studentId, jobId, reviewerId, onRatingSubmitted }) {
+export default function RateStudent({ studentId, jobId = "general", reviewerId, onRatingSubmitted }) {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
   const [hasRated, setHasRated] = useState(false);
-  const [reviewerId, setReviewerId] = useState(null);
 
-  // Check if current user has already rated this job
+  // Check if current user has already rated this job/student
   useEffect(() => {
     const checkExistingRating = async () => {
-      if (!auth.currentUser || !jobId || !studentId) return;
+      if (!auth.currentUser || !studentId) return;
 
       const currentUserId = auth.currentUser.uid;
-      setReviewerId(currentUserId);
 
       try {
         const ratingsRef = collection(db, "ratings");
         const q = query(
           ratingsRef,
           where("jobId", "==", jobId),
+          where("reviewedStudentId", "==", studentId),
           where("reviewerId", "==", currentUserId)
         );
         const querySnapshot = await getDocs(q);
@@ -54,7 +53,9 @@ export default function RateStudent({ studentId, jobId, reviewerId, onRatingSubm
           setComment(existingRating.comment || "");
           setMessage({
             type: "info",
-            text: "You have already rated this job. You can update your rating.",
+            text: jobId === "general"
+              ? "You have already reviewed this profile. You can update your review."
+              : "You have already rated this job. You can update your rating.",
           });
         }
       } catch (error) {
@@ -78,10 +79,10 @@ export default function RateStudent({ studentId, jobId, reviewerId, onRatingSubm
       return;
     }
 
-    if (!studentId || !jobId) {
+    if (!studentId) {
       setMessage({
         type: "error",
-        text: "Missing required information (student ID or job ID).",
+        text: "Missing required information (student ID).",
       });
       return;
     }
@@ -97,6 +98,7 @@ export default function RateStudent({ studentId, jobId, reviewerId, onRatingSubm
       const q = query(
         ratingsRef,
         where("jobId", "==", jobId),
+        where("reviewedStudentId", "==", studentId),
         where("reviewerId", "==", currentUserId)
       );
       const querySnapshot = await getDocs(q);
@@ -275,8 +277,8 @@ export default function RateStudent({ studentId, jobId, reviewerId, onRatingSubm
             ...(message.type === "success"
               ? styles.messageSuccess
               : message.type === "error"
-              ? styles.messageError
-              : styles.messageInfo),
+                ? styles.messageError
+                : styles.messageInfo),
           }}
         >
           {message.text}
@@ -342,8 +344,8 @@ export default function RateStudent({ studentId, jobId, reviewerId, onRatingSubm
           {isSubmitting
             ? "Submitting..."
             : hasRated
-            ? "Update Rating"
-            : "Submit Rating"}
+              ? "Update Rating"
+              : "Submit Rating"}
         </button>
       </form>
     </div>
