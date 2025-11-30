@@ -13,6 +13,7 @@ const ADMIN_EMAILS = [
 
 export default function UpdateProfile() {
   const [formData, setFormData] = useState({
+
     name: "",
     skills: [],
     education: "",
@@ -35,6 +36,7 @@ export default function UpdateProfile() {
         window.location.hash = "#/login";
         return;
       }
+
 
       // Check for UID in URL (for admin editing)
       const hash = window.location.hash;
@@ -72,6 +74,7 @@ export default function UpdateProfile() {
             education: userData.education || "",
             bio: userData.bio || "",
             profilePicturePreview: userData.profilePicture || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=faces&auto=format",
+
             coverPhotoPreview: userData.coverPhoto || "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1000&auto=format&fit=crop&q=60",
             visibility: userData.visibility || "public",
             availability: userData.availability || "online"
@@ -242,6 +245,7 @@ export default function UpdateProfile() {
       let profilePictureUrl = formData.profilePicturePreview;
       let coverPhotoUrl = formData.coverPhotoPreview;
 
+
       // Upload profile picture if changed
       if (formData.profilePicture && formData.profilePicture instanceof File) {
         try {
@@ -290,6 +294,7 @@ export default function UpdateProfile() {
         education: formData.education,
         bio: formData.bio,
         profilePicture: profilePictureUrl,
+
         coverPhoto: coverPhotoUrl,
         visibility: formData.visibility,
         availability: formData.availability,
@@ -302,6 +307,7 @@ export default function UpdateProfile() {
 
       // Show success message briefly, then redirect
       alert("Profile updated successfully!");
+
       // Redirect back to the profile we were editing
       if (targetUserId === user.uid) {
         window.location.hash = "#/profile";
@@ -437,6 +443,7 @@ export default function UpdateProfile() {
               />
               {errors.name && <span className={styles.error}>{errors.name}</span>}
             </div>
+
 
             {/* Bio Field */}
             <div className={styles.inputGroup}>

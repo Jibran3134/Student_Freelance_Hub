@@ -35,6 +35,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchUserData = async (currentUser) => {
+
       setLoading(true);
       setError(null);
 
@@ -86,6 +87,7 @@ export default function ProfilePage() {
             ...doc.data()
           }));
 
+
           setProfileData({
             ...userData,
             portfolioItems: portfolioItems,
@@ -114,6 +116,7 @@ export default function ProfilePage() {
         setLoading(false);
       }
     };
+
 
     const unsubscribe = auth.onAuthStateChanged((user) => {
       fetchUserData(user);
